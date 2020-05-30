@@ -1,0 +1,196 @@
+@charset 'utf-8';
+
+// Each foundation sub component includes its own
+// settings with 'suffix !default'. Settings
+// values can be overridden by specifying them here
+
+@import 'foundation-sites/scss/foundation';
+
+// incldue the foundation components we need
+@include foundation-global-styles;
+@include foundation-xy-grid-classes;
+@include foundation-typography;
+@include foundation-callout;
+
+//@import 'motion-ui';
+
+// https://stackoverflow.com/a/2416032/1148030
+%downwardsText {
+    -webkit-transform: rotate(90deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+        -ms-transform: rotate(90deg);  /* IE 9 */
+            transform: rotate(90deg);  /* Firefox 16+, IE 10+, Opera */
+}
+
+#app {
+    @extend .grid-container;
+} 
+
+// 25 items in visible part: 12 + 12 + 1 (1 extra C to be able to jump full octave)
+// 12 extra items on both ends for scrolling buffer
+// when starting to scroll the extra items at the shrinking end are replaced
+// with a padding element with animated width
+
+$grid-columns: 12+12+12+1+12;
+$xy-block-grid-max: 1;
+$grid-column-gutter: 1px;
+$grid-margin-gutters: 1px;
+
+// https://stackoverflow.com/a/52685817/1148030
+// Also see the meta viewport in index.html
+body {
+    touch-action: none;
+}
+
+// Clipping wrapper to get the mobile browser feel that it
+// does not need to enable extra scrolling to show the 
+// overflowing infinite scroll "buffer" elements.
+%clippingWrapper {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+%noteInfoRow {
+    @extend .grid-x;
+    @extend .relative-notes-grid;
+    margin-left: -45% !important;
+    margin-right: -45% !important;
+}
+
+@media screen and (max-width: 1080px) {
+  %noteInfoRow {
+    margin-left: -80% !important;
+    margin-right: -80% !important;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  %noteInfoRow {
+    margin-left: -120% !important;
+    margin-right: -120% !important;
+  }
+}
+
+@media screen and (max-width: 660px) {
+  %noteInfoRow {
+    margin-left: -150% !important;
+    margin-right: -150% !important;
+  }
+}
+
+@media screen and (max-width: 550px) {
+  %noteInfoRow {
+    margin-left: -200% !important;
+    margin-right: -200% !important;
+  }
+}
+
+%intervalInfoElementBox {
+    @extend .small-1;
+    @extend .cell;
+    border: 1px solid rgba($black, 0.25);
+    margin: 0 0 1rem 0;
+    text-align: center;
+}
+
+// Note names, note steps etc "moving" cells have this class also
+// to control animations
+%noteInfoCell {
+    transition-property: background-color;
+    transition-duration: 3s;
+}
+
+%noteInfoCell.current {
+    background-color: #dd2785;
+    transition-property: background-color;
+    transition-duration: 0.1s;
+}
+
+/// interval number strip
+
+.intervalOffsetsStrip {
+    @extend %clippingWrapper;
+}
+
+.intervalOffsetsRow {
+    @extend %noteInfoRow;
+}
+
+.intervalStepsCell {
+    @extend %intervalInfoElementBox;
+}
+
+/// interval name strip
+
+$intervalNameMaxLength: 9rem;
+
+.intervalNamesStrip {
+    @extend %clippingWrapper;
+}
+
+.intervalNamesRow {
+    @extend %noteInfoRow;
+}
+
+.intervalNameCell {
+    @extend %intervalInfoElementBox;
+    text-align: left;
+    height: $intervalNameMaxLength;
+}
+
+.intervalName {
+    padding: 0 0 0 1rem;
+    width: $intervalNameMaxLength;
+}
+
+.intervalNameRotate {
+    @extend %downwardsText;
+}
+
+//// relative note names strip
+
+.noteNamesStrip {
+    @extend %clippingWrapper;
+}
+
+.noteNamesRow {
+    @extend %noteInfoRow;
+}
+
+.noteNameCell {
+    @extend %intervalInfoElementBox;
+    @extend %noteInfoCell;
+}
+
+/// relative note numbers strip
+
+.noteNumbersStrip {
+    @extend %clippingWrapper;
+}
+
+.noteNumbersRow {
+    @extend %noteInfoRow;
+}
+
+.noteNumberCell {
+    @extend %intervalInfoElementBox;
+    @extend %noteInfoCell;
+}
+
+/// hidden row used to query the actual width of a "note info cell"
+
+.noteInfoGridProbeStrip {
+    @extend %clippingWrapper;
+}
+
+.noteInfoGridProbeRow {
+    @extend %noteInfoRow;
+}
+
+.noteInfoGridProbeCell {
+    @extend %intervalInfoElementBox;
+}
+
+@include xy-margin-grid-classes(left right, false, '.relative-notes-grid')
+  
