@@ -3,6 +3,7 @@ open SynthState;
 
 type stateChange =
   | Voice(voice)
+  | FrameChanged(int)
   | CurrentNoteChanged(note);
 
 type listener = stateChange => unit;
@@ -10,6 +11,7 @@ type listener = stateChange => unit;
 type state = {
   currentNote: note,
   updateIndex: int,
+  frame: int,
   listeners: list(stateChange => unit),
   lastUpdate: list(stateChange),
 };
@@ -17,11 +19,13 @@ type state = {
 let initialState: state = {
   currentNote: middleC,
   updateIndex: 0,
+  frame: 0,
   listeners: [],
   lastUpdate: [],
 };
 
 type event =
+  | AnimationFrame(float)
   | RegisterListener(listener)
   | UnregisterListener(listener);
 
@@ -36,6 +40,7 @@ let updateState = (prevState: state, event: event): state => {
 
   let newState: state =
     switch (event) {
+    | AnimationFrame(_)  => {...state, frame: state.frame + 1, lastUpdate:[FrameChanged(state.frame + 1)]}
     | RegisterListener(listener) => {...state, listeners: [listener, ...state.listeners]}
     | UnregisterListener(listener) => {
         ...state,

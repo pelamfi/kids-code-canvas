@@ -25,7 +25,7 @@ type appTopLevelState = {
   debugModes: DebugMode.debugModes,
 };
 
-let initialComponents = Set.fromArray([|NoteInfoStrips|], ~id=(module AppComponentComparable));
+let initialComponents = Set.fromArray([|CanvasExperiment|], ~id=(module AppComponentComparable));
 
 let initial: appTopLevelState = {appComponents: initialComponents, debugModes: DebugMode.initial};
 
@@ -60,13 +60,28 @@ let debugKeyboardListenerEffect = (dispatch: dispatch, _): option(unit => unit) 
   Some(() => EventTarget.removeKeyUpEventListener(keyUpListener, eventTarget));
 };
 
+type effectCleanup = unit => unit;
+
+type effect = unit => option(effectCleanup);
+
+let timerUpdateEffect = (isAnimating: bool, dispatch: (CodeCanvasState.event) => unit): effect => {
+  () =>
+    if (isAnimating) {
+      Some(GroupedRaf.register((timerMs: float) => dispatch(AnimationFrame(timerMs))));
+    } else {
+      None;
+    };
+};
+
 [@react.component]
 let make = () => {
   let (state, dispatchCommand) = React.useReducer(appTopLevelStateReducer, initial);
+  
+  React.useEffect2(timerUpdateEffect(true, CodeCanvasState.dispatch), ((), true));
 
   let elements: list(reactComponent) = [
     if (Set.has(state.appComponents, CanvasExperiment)) {
-      <CanvasExperiment key="canvasExperiment" />;
+      <CanvasExperiment key="canvasExperiment"/>;
     } else {
       emptyFragment;
     },
