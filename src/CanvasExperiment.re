@@ -23,11 +23,13 @@ let drawOnCanvas =
      clearRect(c, ~x=0., ~y=0., ~w=w, ~h=h);
   }
 
+  let widerThanHigher = w /. h;
+
   RangeOfInt.map(frame => {
     let t = float_of_int(frame) *. AnimationConstants.targetFrameInterval;
     let renderState: Eval.evalState = state.evalFunction(t);
-    let xUnit = unitTMod({value: renderState.x /. 2.0 +. 0.5});
-    let yUnit = unitTMod({value: renderState.y /. 2.0 +. 0.5});
+    let xUnit: unitT = {value: MathUtil.flooredDivisionRemainderFloat(renderState.x /. 2.0 +. 0.5 *. widerThanHigher, widerThanHigher)};
+    let yUnit: unitT = {value: MathUtil.flooredDivisionRemainderFloat(renderState.y /. 2.0 +. 0.5, 1.0)};
     let r = unitMod(renderState.r) *. 256.0;
     let g = unitMod(renderState.g) *. 256.0;
     let b = unitMod(renderState.b) *. 256.0;
