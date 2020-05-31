@@ -22,6 +22,8 @@ let lerpWidth = (a: width, b: width, t: unitT): width => {value: lerp(a.value, b
 
 let unitTClamp = (t: unitT): unitT => {value: Js.Math.min_float(Js.Math.max_float(0.0, t.value), 1.0)}
 
+let unitTMod = (t: unitT): unitT => {value: MathUtil.flooredDivisionRemainderFloat(t.value, 1.0)}
+
 let tOfDuration = (fromStart: msDuration, total: msDuration): unitT => {
   {value: fromStart.value /. total.value}
 }

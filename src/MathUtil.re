@@ -3,6 +3,14 @@ let flooredDivisionRemainder = (a: int, b: int): int => {
   (a mod b + b) mod b;
 };
 
+let flooredDivisionRemainderFloat: (float, float) => float = [%bs.raw
+  {|
+function flooredDivisionRemainderF(a, b) {
+  return a % b;
+}
+|}]
+
+
 // NOTE: This is not properly defined floored division if b < 0
 let flooredDivision = (a: int, b: int): int =>
   if (a < 0) {

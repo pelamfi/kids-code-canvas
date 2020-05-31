@@ -3,17 +3,24 @@
 [@bs.deriving jsConverter]
 type evalState = {
   x: float,
-  y: float
+  y: float,
+  r: float,
+  g: float,
+  b: float 
 };
 
 let evalScripletPrefix: string = {|
 "use strict";
 var x = 0.0;
 var y = 0.0;
+var punainen = 0.9;
+var vihrea = 0.7;
+var sininen = 0.4;
+var lapinakyvyys = 1.0;
 |};
 
 let evalScripletSuffix: string = {|
-return {x, y};
+return {x, y, r: punainen, g: vihrea, b: sininen};
 |};
 
 type evalFunction = (float) => evalState;
@@ -36,5 +43,7 @@ let createEvalFunction = (scriplet: string): evalFunction => {
   createEvalFunctionJs(combinedScript);
 };
 
-let initial = createEvalFunction("x = Math.sin(t) / 2; y = Math.cos(t * 8) / 2");
+let initial = createEvalFunction("x = t * 3; y = t; punainen = 0.5; vihrea = t");
+
+let initialState = createEvalFunction("")(0.0);
 

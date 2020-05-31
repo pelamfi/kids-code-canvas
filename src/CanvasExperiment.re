@@ -22,9 +22,9 @@ let drawOnCanvas =
   RangeOfInt.map(frame => {
     let t = float_of_int(frame) *. AnimationConstants.targetFrameInterval;
     let renderState: Eval.evalState = state.evalFunction(t);
-    setFillStyle(context.context, String, "red");
-    let xUnit: unitT = {value: renderState.x /. 2.0 +. 0.5};
-    let yUnit: unitT = {value: renderState.y /. 2.0 +. 0.5};
+    setFillStyle(context.context, String, "#0f0000");
+    let xUnit: unitT = unitTMod({value: renderState.x /. 2.0 +. 0.5});
+    let yUnit: unitT = unitTMod({value: renderState.y /. 2.0 +. 0.5});
     let x = lerp(0.0, context.dimensions.height, xUnit)
     let y = lerp(context.dimensions.height, 0.0, yUnit)
     fillRect(context.context, ~x=x, ~y=y, ~w=4.0, ~h=4.0);
