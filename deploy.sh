@@ -2,4 +2,5 @@
 set -euo pipefail
 IFS=$'\n\t'
 npm run webpack:production
-rsync -av build/ pelam.fi:/var/www/knektkajen/
+rsync -nav --delete build/ server/public/  
+git subtree push --prefix server heroku master
