@@ -10,6 +10,7 @@ function flooredDivisionRemainderF(a, b) {
 }
 |}]
 
+let pi = [%bs.raw{| Math.PI |}]
 
 // NOTE: This is not properly defined floored division if b < 0
 let flooredDivision = (a: int, b: int): int =>

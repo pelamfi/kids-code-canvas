@@ -15,22 +15,31 @@ let drawOnCanvas =
     (state: canvasState, dispatchCanvasEvent: (canvasEvent) => unit, context: canvasDrawContext): unit => {
   open Webapi.Canvas.Canvas2d;
   
+  let c = context.context;
+  let h = context.dimensions.height;
+  let w = context.dimensions.width;
+
   if (state.frameCount == 0) {
-     clearRect(context.context, ~x=0., ~y=0., ~w=context.dimensions.width, ~h=context.dimensions.height);
+     clearRect(c, ~x=0., ~y=0., ~w=w, ~h=h);
   }
 
   RangeOfInt.map(frame => {
     let t = float_of_int(frame) *. AnimationConstants.targetFrameInterval;
     let renderState: Eval.evalState = state.evalFunction(t);
-    setFillStyle(context.context, String, "#0f0000");
-    let xUnit: unitT = unitTMod({value: renderState.x /. 2.0 +. 0.5});
-    let yUnit: unitT = unitTMod({value: renderState.y /. 2.0 +. 0.5});
-    let x = lerp(0.0, context.dimensions.height, xUnit)
-    let y = lerp(context.dimensions.height, 0.0, yUnit)
-    fillRect(context.context, ~x=x, ~y=y, ~w=4.0, ~h=4.0);
+    let xUnit = unitTMod({value: renderState.x /. 2.0 +. 0.5});
+    let yUnit = unitTMod({value: renderState.y /. 2.0 +. 0.5});
+    let r = unitMod(renderState.r) *. 256.0;
+    let g = unitMod(renderState.g) *. 256.0;
+    let b = unitMod(renderState.b) *. 256.0;
+    let x = lerp(0.0, h, xUnit);
+    let y = lerp(h, 0.0, yUnit);
+    setFillStyle(c, String, Printf.sprintf("rgba(%f,%f,%f,%f)", r, g, b, 1.0));
+    beginPath(c);
+    arc(~x = x, ~y = y, ~r = 4.5, ~startAngle=0.0, ~endAngle = MathUtil.pi *. 2.0, ~anticw=false, c);
+    fill(c);
+    // fillRect(c, ~x=x, ~y=y, ~w=4.0, ~h=4.0);
     dispatchCanvasEvent(FrameRendered);
   }, RangeOfInt.make(state.frameCount, state.expectedFrameCount)) |> ignore;
-
 };
 
 let updateState = (state: canvasState, event: canvasEvent): canvasState => {

@@ -24,6 +24,8 @@ let unitTClamp = (t: unitT): unitT => {value: Js.Math.min_float(Js.Math.max_floa
 
 let unitTMod = (t: unitT): unitT => {value: MathUtil.flooredDivisionRemainderFloat(t.value, 1.0)}
 
+let unitMod = (t: float): float => MathUtil.flooredDivisionRemainderFloat(t, 1.0)
+
 let tOfDuration = (fromStart: msDuration, total: msDuration): unitT => {
   {value: fromStart.value /. total.value}
 }
