@@ -35,3 +35,6 @@ let createEvalFunction = (scriplet: string): evalFunction => {
   let combinedScript = evalScripletPrefix ++ scriplet ++ evalScripletSuffix;
   createEvalFunctionJs(combinedScript);
 };
+
+let initial = createEvalFunction("x = Math.sin(t) / 2; y = Math.cos(t * 8) / 2");
+

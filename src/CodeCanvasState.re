@@ -1,25 +1,35 @@
 open Note;
 open SynthState;
+open AnimationConstants;
 
 type stateChange =
   | Voice(voice)
-  | FrameChanged(int)
+  | RenderFramesTo(int)
   | CurrentNoteChanged(note);
 
 type listener = stateChange => unit;
 
+type frameTimes = {
+  firstMs: float,
+  lastMs: float
+}
+
 type state = {
-  currentNote: note,
   updateIndex: int,
-  frame: int,
+  frameTimes: option(frameTimes),
+  animFrameCount: int,
+  evalFunction: Eval.evalFunction,
   listeners: list(stateChange => unit),
   lastUpdate: list(stateChange),
 };
 
+let expectedAnimFrameCount = (times: frameTimes): int => int_of_float((times.lastMs -. times.firstMs) /. targetFrameIntervalMs)
+
 let initialState: state = {
-  currentNote: middleC,
   updateIndex: 0,
-  frame: 0,
+  frameTimes: None,
+  animFrameCount: 0,
+  evalFunction: Eval.initial,
   listeners: [],
   lastUpdate: [],
 };
@@ -40,7 +50,11 @@ let updateState = (prevState: state, event: event): state => {
 
   let newState: state =
     switch (event) {
-    | AnimationFrame(_)  => {...state, frame: state.frame + 1, lastUpdate:[FrameChanged(state.frame + 1)]}
+    | AnimationFrame(frameMs) => {
+      let firstMs: float = Belt.Option.map(state.frameTimes, t => t.firstMs) |> OptionUtil.getWithDefaultF(() => frameMs);  
+      let frameTimes: frameTimes = {firstMs: firstMs, lastMs: frameMs};
+      {...state, frameTimes: Some(frameTimes), lastUpdate:[RenderFramesTo(expectedAnimFrameCount(frameTimes))]}
+    }
     | RegisterListener(listener) => {...state, listeners: [listener, ...state.listeners]}
     | UnregisterListener(listener) => {
         ...state,
