@@ -5,7 +5,6 @@ let drawOnCanvas =
     (context: canvasDrawContext): unit => {
   open Webapi.Canvas.Canvas2d;
   clearRect(context.context, ~x=0., ~y=0., ~w=context.dimensions.width, ~h=context.dimensions.height);
-  Vexflow.renderSingleNoteOnStaff(context, Note.middleC);
 };
 
 [@react.component]

@@ -71,7 +71,7 @@ let make = () => {
       emptyFragment;
     },
     if (Set.has(state.appComponents, NoteInfoStrips)) {
-      <NoteInfoStrips key="noteInfoStrips" debugModes={state.debugModes} />;
+      <p>{ReasonReact.string("foo")}</p>;
     } else {
       emptyFragment;
     },
