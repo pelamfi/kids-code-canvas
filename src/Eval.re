@@ -43,7 +43,7 @@ let createEvalFunction = (scriplet: string): evalFunction => {
   createEvalFunctionJs(combinedScript);
 };
 
-let initial = createEvalFunction("x = (Math.cos(t*9)+Math.cos(t*2)) * 0.5; y = (Math.sin(t*9)+Math.sin(t*2)) * 0.5; punainen = 0.5; punainen = Math.sin(t)");
+let initial = createEvalFunction("x = t * 0.1 + (Math.cos(t*9)+Math.cos(t*2)) * 0.5; y = (Math.sin(t*9)+Math.sin(t*2)) * 0.5; punainen = 0.5; punainen = Math.sin(t)");
 
 let initialState = createEvalFunction("")(0.0);
 
