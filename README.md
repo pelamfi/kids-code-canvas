@@ -65,3 +65,18 @@ If you make use of routing (via `ReasonReact.Router` or similar logic) ensure th
 ## Run tests
 
     npx jest
+
+## Notes on Heroku
+
+Install heroku command line tool.
+
+    heroku create pelam-kids-code-canvas --region eu
+      Creating ⬢ pelam-kids-code-canvas... done, region is eu
+      https://pelam-kids-code-canvas.herokuapp.com/ | https://git.heroku.com/pelam-kids-code-canvas.git
+
+
+  https://coderwall.com/p/ssxp5q/heroku-deployment-without-the-app-being-at-the-repo-root-in-a-subfolder
+
+  git remote add heroku https://git.heroku.com/pelam-kids-code-canvas.git
+
+  git subtree push --prefix server heroku master
