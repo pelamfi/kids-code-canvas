@@ -1,11 +1,13 @@
 // https://stackoverflow.com/a/58689472/1148030
 open CanvasUtil;
 open AnimationUtil;
+open Belt;
 
 type canvasState = {frameCount: int, expectedFrameCount: int, evalFunction: Eval.evalFunction};
 
 type canvasEvent = 
   | FrameRendered
+  | Redraw
   | ExpectedFrameCount(int)
   | SetEvalFunction(Eval.evalFunction);
 
@@ -25,6 +27,8 @@ let drawOnCanvas =
 
   let widerThanHigher = w /. h;
 
+  let frameRenderCount = MathUtil.clampInt(0, 60, state.expectedFrameCount - state.frameCount);
+
   RangeOfInt.map(frame => {
     let t = float_of_int(frame) *. AnimationConstants.targetFrameInterval;
     let renderState: Eval.evalState = state.evalFunction(t);
@@ -41,11 +45,12 @@ let drawOnCanvas =
     fill(c);
     // fillRect(c, ~x=x, ~y=y, ~w=4.0, ~h=4.0);
     dispatchCanvasEvent(FrameRendered);
-  }, RangeOfInt.make(state.frameCount, state.expectedFrameCount)) |> ignore;
+  }, RangeOfInt.make(state.frameCount, state.frameCount + frameRenderCount)) |> ignore;
 };
 
 let updateState = (state: canvasState, event: canvasEvent): canvasState => {
   switch(event) {
+    | Redraw => {...state, frameCount: 0}
     | ExpectedFrameCount(c) => {...state, expectedFrameCount: c}
     | FrameRendered => {...state, frameCount: state.frameCount + 1}
     | SetEvalFunction(f) => {evalFunction: f, frameCount: 0, expectedFrameCount: 0}
@@ -63,6 +68,8 @@ let frameChangeListenerEffect =
   );
 };
 
+let canvasCellId = "mainCanvas";
+
 [@react.component]
 let make = () => {
   open React;
@@ -71,16 +78,55 @@ let make = () => {
 
   useLayoutEffect2(() => {
     Ref.current(canvasElementRef)
-    |> Belt.Option.map(_, drawOnCanvasElement(drawOnCanvas(canvasState, dispatchCanvasEvent)))
+    |> Option.map(_, drawOnCanvasElement(drawOnCanvas(canvasState, dispatchCanvasEvent)))
     |> ignore;
     None;
   }, (false, canvasState.expectedFrameCount));
 
-  React.useEffect0(frameChangeListenerEffect(dispatchCanvasEvent, CodeCanvasState.dispatch));  
+  React.useLayoutEffect2(
+    () => {
+      let sendUpdate = () => {
+        let doc = Webapi.Dom.document;
+        let e = Webapi.Dom.Document.getElementById(canvasCellId, doc);
+        switch(Option.map(e, Webapi.Dom.Element.getBoundingClientRect), Ref.current(canvasElementRef)) {
+          | (Some(clientRect), Some(canvasElement)) => {
+            let width = Webapi.Dom.DomRect.width(clientRect);
+            let height = width *. (9.0 /. 16.0);
+            Webapi.Dom.Element.setAttribute("width", Js.Float.toString(width), canvasElement);
+            Webapi.Dom.Element.setAttribute("height", Js.Float.toString(height), canvasElement);
+            dispatchCanvasEvent(Redraw);
+            ();
+          }
+          | _ => ()
+        };
+      };
 
+      let observer = ObserveResize.observeResize(canvasCellId, sendUpdate);
+      Some(() => ObserveResize.unobserve(observer));
+    },
+    ((), ()),
+  );
+
+
+  React.useEffect0(frameChangeListenerEffect(dispatchCanvasEvent, CodeCanvasState.dispatch));
+  <>
+  <div className="canvasRow">
+  <div className="leftCell"/>
+  
+  <div className="canvasCell">
   <canvas
     ref={ReactDOMRe.Ref.callbackDomRef(elem =>
       React.Ref.setCurrent(canvasElementRef, Js.Nullable.toOption(elem))
     )}
-  />;
+  />
+  </div>
+
+  <div className="rightCell"/>
+  </div>
+
+  <div className="canvasProbeRow">
+  <div id={canvasCellId} className="canvasProbeCell">
+  </div>
+  </div>  
+  </>;
 };

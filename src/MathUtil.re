@@ -10,6 +10,12 @@ function flooredDivisionRemainderF(a, b) {
 }
 |}]
 
+let minInt = (a: int, b: int): int => a < b ? a : b;
+
+let maxInt = (a: int, b: int): int => a > b ? a : b;
+
+let clampInt = (min: int, max: int, value: int): int => maxInt(min, minInt(max, value))
+
 let pi = [%bs.raw{| Math.PI |}]
 
 // NOTE: This is not properly defined floored division if b < 0
