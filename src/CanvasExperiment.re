@@ -39,9 +39,10 @@ let drawOnCanvas =
     let b = unitMod(renderState.b) *. 256.0;
     let x = lerp(0.0, h, xUnit);
     let y = lerp(h, 0.0, yUnit);
+    let f = w /. 100.0
     setFillStyle(c, String, Printf.sprintf("rgba(%f,%f,%f,%f)", r, g, b, 1.0));
     beginPath(c);
-    arc(~x = x, ~y = y, ~r = 4.5, ~startAngle=0.0, ~endAngle = MathUtil.pi *. 2.0, ~anticw=false, c);
+    arc(~x = x, ~y = y, ~r = f, ~startAngle=0.0, ~endAngle = MathUtil.pi *. 2.0, ~anticw=false, c);
     fill(c);
     // fillRect(c, ~x=x, ~y=y, ~w=4.0, ~h=4.0);
     dispatchCanvasEvent(FrameRendered);
