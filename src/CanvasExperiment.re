@@ -87,13 +87,12 @@ let make = () => {
   React.useLayoutEffect2(
     () => {
       let sendUpdate = () => {
-        let doc = Webapi.Dom.document;
-        let e = Webapi.Dom.Document.getElementById(canvasCellId, doc);
-        switch(Option.map(e, Webapi.Dom.Element.getBoundingClientRect), Ref.current(canvasElementRef)) {
-          | (Some(clientRect), Some(canvasElement)) => {
-            let width = Webapi.Dom.DomRect.width(clientRect);
-            let height = width *. (9.0 /. 16.0);
-            Webapi.Dom.Element.setAttribute("width", Js.Float.toString(width), canvasElement);
+        open Webapi.Dom;
+        let e = Document.getElementById(canvasCellId, document);
+        switch(Option.map(e, Element.clientWidth), Ref.current(canvasElementRef)) {
+          | (Some(clientWidth), Some(canvasElement)) => {
+            let height = float_of_int(clientWidth) *. (9.0 /. 16.0);
+            Webapi.Dom.Element.setAttribute("width", string_of_int(clientWidth), canvasElement);
             Webapi.Dom.Element.setAttribute("height", Js.Float.toString(height), canvasElement);
             dispatchCanvasEvent(Redraw);
             ();
@@ -115,7 +114,7 @@ let make = () => {
   <div className="leftCell"/>
   
   <div className="canvasCell">
-  <canvas
+  <canvas className="mainCanvas"
     ref={ReactDOMRe.Ref.callbackDomRef(elem =>
       React.Ref.setCurrent(canvasElementRef, Js.Nullable.toOption(elem))
     )}

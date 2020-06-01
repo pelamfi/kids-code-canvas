@@ -12,6 +12,11 @@
 @include foundation-typography;
 @include foundation-callout;
 
+$brightBackground: rgba(210, 225, 220, 255);
+$darkerBackground: rgba(4, 161, 170, 255);
+$dark: rgba(15, 14, 12, 255);
+$background: $brightBackground;
+
 #app {
     @extend .grid-container;
 } 
@@ -20,6 +25,8 @@
 // Also see the meta viewport in index.html
 body {
     touch-action: none;
+    background-color: $background;
+    color: $dark;
 }
 
 %mainGrid {
@@ -48,8 +55,19 @@ body {
     @extend %sideContentCell;
 }
 
+%canvasCellCommon {
+    border-style: solid;
+    border-color: $dark;
+    border-width: 1px;
+}
+
 .canvasCell {
     @extend %mainContentCell;
+    @extend %canvasCellCommon;
+}
+
+.mainCanvas {
+    background-color: $darkerBackground;
 }
 
 .rightCell {
@@ -62,4 +80,6 @@ body {
 
 .canvasProbeCell {
     @extend %mainContentCell;
+    @extend %canvasCellCommon;
+    border-color: $background;
 }
