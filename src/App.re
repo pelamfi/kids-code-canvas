@@ -86,7 +86,7 @@ let make = () => {
       emptyFragment;
     },  
     if (Set.has(state.appComponents, CanvasExperiment)) {
-      <CanvasExperiment key="canvasExperiment"/>;
+      <MainCanvas key="canvasExperiment"/>;
     } else {
       emptyFragment;
     },

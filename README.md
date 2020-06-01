@@ -88,8 +88,11 @@ Install heroku command line tool.
 
     x = t * 0.1 + (cos(t*9)+cos(t*2)) * 0.5; y = (sin(t*9)+sin(t*2)) * 0.5; sininen = cos(t * 3); vihrea = 0.5; punainen = sin(t)    
 
-
     x = sin(t * 3) + t * 0.25;y = cos(t * 3)
     if (t % 2 < 1) {
       x = t * 0.1 + (cos(t*9)+cos(t*2)) * 0.5; y = (sin(t*9)+sin(t*2)) * 0.5; sininen = cos(t * 3); vihrea = 0.5; punainen = sin(t)
     }
+
+    x = t * 1001;y = t * pi;punainen = t * 33;sininen = t;vihrea = t
+
+    x = t * 1001.12;y = t * pi;punainen = t * 33;sininen = t;vihrea = t
