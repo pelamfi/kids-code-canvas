@@ -58,12 +58,12 @@ let updateState = (state: canvasState, event: canvasEvent): canvasState => {
   }
 };
 
-let frameChangeListenerEffect =
+let codeCanvasStateChangeListenerEffect =
     (dispatchCanvasEvent: canvasEvent => unit): ((CodeCanvasState.acceptEvent, unit) => option(unit => unit)) => {
   CodeCanvasState.listenerEffect(stateChange =>
     switch (stateChange) {
     | RenderFramesTo(frame) => dispatchCanvasEvent(ExpectedFrameCount(frame))
-    // | SetEvalFunction(frame) => dispatchCanvasEvent(ExpectedFrameCount(frame))
+    | ScriptletFunctionChanged(evalFunc) => dispatchCanvasEvent(SetEvalFunction(evalFunc))
     | _ => ()
     }
   );
@@ -108,7 +108,7 @@ let make = () => {
   );
 
 
-  React.useEffect0(frameChangeListenerEffect(dispatchCanvasEvent, CodeCanvasState.dispatch));
+  React.useEffect0(codeCanvasStateChangeListenerEffect(dispatchCanvasEvent, CodeCanvasState.dispatch));
   <>
   <div className="canvasRow">
   <div className="leftCell"/>

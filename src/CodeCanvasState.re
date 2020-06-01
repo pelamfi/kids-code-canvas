@@ -5,6 +5,7 @@ open AnimationConstants;
 type stateChange =
   | Voice(voice)
   | RenderFramesTo(int)
+  | ScriptletFunctionChanged(Eval.evalFunction)
   | CurrentNoteChanged(note);
 
 type listener = stateChange => unit;
@@ -17,7 +18,7 @@ type frameTimes = {
 type state = {
   updateIndex: int,
   frameTimes: option(frameTimes),
-  animFrameCount: int,
+  expectedFrameCount: int,
   evalFunction: Eval.evalFunction,
   listeners: list(stateChange => unit),
   lastUpdate: list(stateChange),
@@ -28,13 +29,14 @@ let expectedAnimFrameCount = (times: frameTimes): int => int_of_float((times.las
 let initialState: state = {
   updateIndex: 0,
   frameTimes: None,
-  animFrameCount: 0,
+  expectedFrameCount: 0,
   evalFunction: Eval.initial,
   listeners: [],
   lastUpdate: [],
 };
 
 type event =
+  | ChangeScriptlet(string)
   | AnimationFrame(float)
   | RegisterListener(listener)
   | UnregisterListener(listener);
@@ -50,10 +52,16 @@ let updateState = (prevState: state, event: event): state => {
 
   let newState: state =
     switch (event) {
+    | ChangeScriptlet(scriptletString) => {
+      let evalFunction = Eval.createEvalFunction(scriptletString);
+      let expectedFrameCount = 0;
+      {...state, evalFunction, frameTimes: None, expectedFrameCount, lastUpdate: [RenderFramesTo(expectedFrameCount), ScriptletFunctionChanged(evalFunction)]}
+    }
     | AnimationFrame(frameMs) => {
       let firstMs: float = Belt.Option.map(state.frameTimes, t => t.firstMs) |> OptionUtil.getWithDefaultF(() => frameMs);  
       let frameTimes: frameTimes = {firstMs: firstMs, lastMs: frameMs};
-      {...state, frameTimes: Some(frameTimes), lastUpdate:[RenderFramesTo(expectedAnimFrameCount(frameTimes))]}
+      let expectedFrameCount = expectedAnimFrameCount(frameTimes);
+      {...state, expectedFrameCount, frameTimes: Some(frameTimes), lastUpdate:[RenderFramesTo(expectedFrameCount)]}
     }
     | RegisterListener(listener) => {...state, listeners: [listener, ...state.listeners]}
     | UnregisterListener(listener) => {
