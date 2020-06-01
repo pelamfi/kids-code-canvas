@@ -53,6 +53,6 @@ let createEvalFunction = (scriplet: string): evalFunction => {
   createEvalFunctionJs(combinedScript);
 };
 
-let initial = createEvalFunction("");
+let initial = createEvalFunction("x = t");
 
 let initialState = createEvalFunction("")(0.0);
