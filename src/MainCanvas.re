@@ -3,15 +3,15 @@ open CanvasUtil;
 open AnimationUtil;
 open Belt;
 
-type canvasState = {frameCount: int, expectedFrameCount: int, evalFunction: Eval.evalFunction};
+type canvasState = {frameCount: int, expectedFrameCount: int, evalFunction: Scriptlet.evalFunction};
 
 type canvasEvent = 
   | FrameRendered
   | Redraw
   | ExpectedFrameCount(int)
-  | SetEvalFunction(Eval.evalFunction);
+  | SetEvalFunction(Scriptlet.evalFunction);
 
-let initialCanvasState = {frameCount: 0, expectedFrameCount: 0, evalFunction: Eval.initial};
+let initialCanvasState = {frameCount: 0, expectedFrameCount: 0, evalFunction: Scriptlet.initial};
 
 let drawOnCanvas =
     (state: canvasState, dispatchCanvasEvent: (canvasEvent) => unit, context: canvasDrawContext): unit => {
@@ -31,7 +31,7 @@ let drawOnCanvas =
 
   RangeOfInt.map(frame => {
     let t = float_of_int(frame) *. AnimationConstants.targetFrameInterval;
-    let renderState: Eval.evalState = state.evalFunction(t);
+    let renderState: Scriptlet.evalState = state.evalFunction(t);
     let xUnit: unitT = {value: MathUtil.flooredDivisionRemainderFloat(renderState.x /. 2.0 +. 0.5 *. widerThanHigher, widerThanHigher)};
     let yUnit: unitT = {value: MathUtil.flooredDivisionRemainderFloat(renderState.y /. 2.0 +. 0.5, 1.0)};
     let r = unitMod(renderState.r) *. 256.0;
