@@ -82,28 +82,28 @@ let make = () => {
   React.useEffect2(timerUpdateEffect(true, CodeCanvasState.dispatch), ((), true));
 
   let elements: list(reactComponent) = [
-    if (Set.has(state.appComponents, Help)) {
-      <HelpCell key="help"/>;
+    if (Set.has(state.appComponents, CanvasExperiment)) {
+      <MainCanvas key="mainCanvas"/>;
     } else {
       emptyFragment;
-    },  
+    },    
     if (Set.has(state.appComponents, CodeEditor)) {
       <CodeEditor key="codeEditor"/>;
     } else {
       emptyFragment;
     },  
     if (Set.has(state.appComponents, Help)) {
-      <HelpCell2 key="help"/>;
-    } else {
-      emptyFragment;
-    },  
-    if (Set.has(state.appComponents, CanvasExperiment)) {
-      <MainCanvas key="mainCanvas"/>;
+      <HelpCell key="help1"/>;
     } else {
       emptyFragment;
     },
     if (Set.has(state.appComponents, Help)) {
-      <HelpCell3 key="help"/>;
+      <HelpCell2 key="help2"/>;
+    } else {
+      emptyFragment;
+    },  
+    if (Set.has(state.appComponents, Help)) {
+      <HelpCell3 key="help3"/>;
     } else {
       emptyFragment;
     },  
