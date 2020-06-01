@@ -29,14 +29,16 @@ body {
     color: $dark;
 }
 
-%mainGrid {
+.topLevelGrid {
     @extend .grid-x;
+    @extend .grid-padding-x;
+    padding: 1em;
 }
 
 %sideContentCell {
     @extend .small-12;
-    @extend .medium-2;
-    @extend .large-2;
+    @extend .medium-4;
+    @extend .large-4;
     @extend .cell;
 }
 
@@ -47,10 +49,6 @@ body {
     @extend .cell;
 }
 
-.canvasRow {
-    @extend %mainGrid;
-}
-
 .leftCell {
     @extend %sideContentCell;
 }
@@ -59,6 +57,12 @@ body {
     border-style: solid;
     border-color: $dark;
     border-width: 1px;
+}
+
+.helpCell {
+    @extend .callout;
+    @extend %sideContentCell;
+    font-size: smaller;
 }
 
 .canvasCell {
@@ -73,9 +77,17 @@ body {
 .rightCell {
     @extend %sideContentCell;
 }
-  
-.canvasProbeRow {
-    @extend %mainGrid;
+
+.canvasWrapperCell {
+    @extend .small-12;
+    @extend .medium-12;
+    @extend .large-12;    
+    @extend .cell;
+}
+
+.canvasGrid {
+    @extend .grid-x;
+    @extend .grid-padding-x;
 }
 
 .canvasProbeCell {
@@ -87,14 +99,11 @@ body {
     border-color: transparent;
 }
 
-.codeEditorRow {
-    @extend %mainGrid;
+.codeEditorCell {
+    @extend %mainContentCell;
 }
 
 .codeEditor {
     width: 100%;
 }
 
-.codeEditorCell {
-    @extend %mainContentCell;
-}

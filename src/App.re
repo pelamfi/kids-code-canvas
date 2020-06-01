@@ -4,6 +4,7 @@ open SetUtil;
 
 type appComponent =
   | CodeEditor
+  | Help
   | CanvasExperiment;
 
 type appTopLevelCommand =
@@ -25,7 +26,7 @@ type appTopLevelState = {
   debugModes: DebugMode.debugModes,
 };
 
-let initialComponents = Set.fromArray([|CanvasExperiment, CodeEditor|], ~id=(module AppComponentComparable));
+let initialComponents = Set.fromArray([|CanvasExperiment, CodeEditor, Help|], ~id=(module AppComponentComparable));
 
 let initial: appTopLevelState = {appComponents: initialComponents, debugModes: DebugMode.initial};
 
@@ -48,6 +49,7 @@ let debugKeyboardListenerEffect = (dispatch: dispatch, _): option(unit => unit) 
         switch (code) {
         | "KeyC" => dispatch(ToggleAppComponent(CanvasExperiment))
         | "KeyE" => dispatch(ToggleAppComponent(CodeEditor))
+        | "KeyH" => dispatch(ToggleAppComponent(Help))
         | "KeyZ" => dispatch(ToggleDebugMode(NoteInfoStrips2xZoom))
         | _ => ()
         };
@@ -80,19 +82,39 @@ let make = () => {
   React.useEffect2(timerUpdateEffect(true, CodeCanvasState.dispatch), ((), true));
 
   let elements: list(reactComponent) = [
+    if (Set.has(state.appComponents, Help)) {
+      <HelpCell key="help"/>;
+    } else {
+      emptyFragment;
+    },  
     if (Set.has(state.appComponents, CodeEditor)) {
-      <CodeEditor/>;
+      <CodeEditor key="codeEditor"/>;
+    } else {
+      emptyFragment;
+    },  
+    if (Set.has(state.appComponents, Help)) {
+      <HelpCell2 key="help"/>;
     } else {
       emptyFragment;
     },  
     if (Set.has(state.appComponents, CanvasExperiment)) {
-      <MainCanvas key="canvasExperiment"/>;
+      <MainCanvas key="mainCanvas"/>;
     } else {
       emptyFragment;
     },
+    if (Set.has(state.appComponents, Help)) {
+      <HelpCell3 key="help"/>;
+    } else {
+      emptyFragment;
+    },  
   ];
 
   React.useEffect0(debugKeyboardListenerEffect(dispatchCommand));
 
-  <> {asReact(elements)} </>;
+  <> 
+  <div className="topLevelGrid">{asReact(elements)}
+  <div className="canvasProbeCell">
+  <div id="canvasLayoutProbe" className="canvasProbeDiv"/>
+  </div>
+  </div></>;
 };

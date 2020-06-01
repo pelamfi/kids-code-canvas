@@ -107,11 +107,11 @@ let make = () => {
     ((), ()),
   );
 
-
   React.useEffect0(codeCanvasStateChangeListenerEffect(dispatchCanvasEvent, CodeCanvasState.dispatch));
   <>
-  <div className="canvasRow">
-  <div className="leftCell"/>
+  //<div className="canvasWrapperCell">
+  //<div className="canvasGrid">
+  //<div className="leftCell"/>
   
   <div className="canvasCell">
   <div className="mainCanvasBorder">
@@ -123,15 +123,8 @@ let make = () => {
   </div>
   </div>
 
-  <div className="rightCell"/>
-  </div>
 
-  <div className="canvasProbeRow">
-  <div className="leftCell"/>
-  <div className="canvasProbeCell">
-  <div id={canvasLayoutProbeDivId} className="canvasProbeDiv">
-  </div>
-  </div>
-  </div>  
+  //</div>
+  //</div>
   </>;
 };
