@@ -3,15 +3,15 @@ open CanvasUtil;
 open AnimationUtil;
 open Belt;
 
-type canvasState = {frameCount: int, expectedFrameCount: int, evalFunction: Scriptlet.evalFunction};
+type canvasState = {frameCount: int, expectedFrameCount: int, scriptletFunction: Scriptlet.scriptletFunction};
 
 type canvasEvent = 
   | FrameRendered
   | Redraw
   | ExpectedFrameCount(int)
-  | SetEvalFunction(Scriptlet.evalFunction);
+  | SetScriptletFunction(Scriptlet.scriptletFunction);
 
-let initialCanvasState = {frameCount: 0, expectedFrameCount: 0, evalFunction: Scriptlet.initial};
+let initialCanvasState = {frameCount: 0, expectedFrameCount: 0, scriptletFunction: Scriptlet.initial};
 
 let drawOnCanvas =
     (state: canvasState, dispatchCanvasEvent: (canvasEvent) => unit, context: canvasDrawContext): unit => {
@@ -31,7 +31,7 @@ let drawOnCanvas =
 
   RangeOfInt.map(frame => {
     let t = float_of_int(frame) *. AnimationConstants.targetFrameInterval;
-    let renderState: Scriptlet.evalState = state.evalFunction(t);
+    let renderState: Scriptlet.scriptletState = state.scriptletFunction(t);
     let xUnit: unitT = {value: MathUtil.flooredDivisionRemainderFloat(renderState.x /. 2.0 +. 0.5 *. widerThanHigher, widerThanHigher)};
     let yUnit: unitT = {value: MathUtil.flooredDivisionRemainderFloat(renderState.y /. 2.0 +. 0.5, 1.0)};
     let r = unitMod(renderState.r) *. 256.0;
@@ -54,7 +54,7 @@ let updateState = (state: canvasState, event: canvasEvent): canvasState => {
     | Redraw => {...state, frameCount: 0}
     | ExpectedFrameCount(c) => {...state, expectedFrameCount: c}
     | FrameRendered => {...state, frameCount: state.frameCount + 1}
-    | SetEvalFunction(f) => {evalFunction: f, frameCount: 0, expectedFrameCount: 0}
+    | SetScriptletFunction(f) => {scriptletFunction: f, frameCount: 0, expectedFrameCount: 0}
   }
 };
 
@@ -63,7 +63,7 @@ let codeCanvasStateChangeListenerEffect =
   CodeCanvasState.listenerEffect(stateChange =>
     switch (stateChange) {
     | RenderFramesTo(frame) => dispatchCanvasEvent(ExpectedFrameCount(frame))
-    | ScriptletFunctionChanged(evalFunc) => dispatchCanvasEvent(SetEvalFunction(evalFunc))
+    | ScriptletFunctionChanged(evalFunc) => dispatchCanvasEvent(SetScriptletFunction(evalFunc))
     | _ => ()
     }
   );

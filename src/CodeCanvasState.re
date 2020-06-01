@@ -5,7 +5,7 @@ open AnimationConstants;
 type stateChange =
   | Voice(voice)
   | RenderFramesTo(int)
-  | ScriptletFunctionChanged(Scriptlet.evalFunction)
+  | ScriptletFunctionChanged(Scriptlet.scriptletFunction)
   | CurrentNoteChanged(note);
 
 type listener = stateChange => unit;
@@ -19,7 +19,7 @@ type state = {
   updateIndex: int,
   frameTimes: option(frameTimes),
   expectedFrameCount: int,
-  evalFunction: Scriptlet.evalFunction,
+  evalFunction: Scriptlet.scriptletFunction,
   listeners: list(stateChange => unit),
   lastUpdate: list(stateChange),
 };
@@ -53,7 +53,7 @@ let updateState = (prevState: state, event: event): state => {
   let newState: state =
     switch (event) {
     | ChangeScriptlet(scriptletString) => {
-      let evalFunction = Scriptlet.createEvalFunction(scriptletString);
+      let evalFunction = Scriptlet.compileScriptlet(scriptletString);
       let expectedFrameCount = 0;
       {...state, evalFunction, frameTimes: None, expectedFrameCount, lastUpdate: [RenderFramesTo(expectedFrameCount), ScriptletFunctionChanged(evalFunction)]}
     }

@@ -1,7 +1,7 @@
 
 // State which is evaluated by user provided scriplet and then rendered every frame
 [@bs.deriving jsConverter]
-type evalState = {
+type scriptletState = {
   x: float,
   y: float,
   r: float,
@@ -9,7 +9,7 @@ type evalState = {
   b: float 
 };
 
-let evalScripletPrefix: string = {|
+let scripletCompilePrefix: string = {|
 "use strict";
 var x = 0.0;
 var y = 0.0;
@@ -19,21 +19,21 @@ var sininen = 0.4;
 var lapinakyvyys = 1.0;
 |};
 
-let evalScripletSuffix: string = {|
+let dcripletCompileSuffix: string = {|
 return {x, y, r: punainen, g: vihrea, b: sininen};
 |};
 
-type evalFunction = (float) => evalState;
+type scriptletFunction = (float) => scriptletState;
 
-let createEvalFunctionJs: (string) => evalFunction = [%bs.raw
+let compileScriptletJs: (string) => scriptletFunction = [%bs.raw
   {|
-function createEvalFunction(scriptlet) {
+function compileScriptletJs(scriptlet) {
     try {  
       var compiled = new Function("t", scriptlet);
       return (t) => {
           try {  
             var result = compiled(t);
-            var asRecord = evalStateFromJs(result);
+            var asRecord = scriptletStateFromJs(result);
             return asRecord;
           } catch (exception) {
             console.log(exception);
@@ -48,11 +48,11 @@ function createEvalFunction(scriptlet) {
 |}
 ];
 
-let createEvalFunction = (scriplet: string): evalFunction => {
-  let combinedScript = evalScripletPrefix ++ scriplet ++ evalScripletSuffix;
-  createEvalFunctionJs(combinedScript);
+let compileScriptlet = (scriplet: string): scriptletFunction => {
+  let combinedScript = scripletCompilePrefix ++ scriplet ++ dcripletCompileSuffix;
+  compileScriptletJs(combinedScript);
 };
 
-let initial = createEvalFunction("x = t");
+let initial = compileScriptlet("x = t");
 
-let initialState = createEvalFunction("")(0.0);
+let initialState = initial(0.0);
