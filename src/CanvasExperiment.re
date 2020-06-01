@@ -69,7 +69,7 @@ let frameChangeListenerEffect =
   );
 };
 
-let canvasCellId = "mainCanvas";
+let canvasLayoutProbeDivId = "canvasLayoutProbe";
 
 [@react.component]
 let make = () => {
@@ -88,7 +88,7 @@ let make = () => {
     () => {
       let sendUpdate = () => {
         open Webapi.Dom;
-        let e = Document.getElementById(canvasCellId, document);
+        let e = Document.getElementById(canvasLayoutProbeDivId, document);
         switch(Option.map(e, Element.clientWidth), Ref.current(canvasElementRef)) {
           | (Some(clientWidth), Some(canvasElement)) => {
             let height = float_of_int(clientWidth) *. (9.0 /. 16.0);
@@ -101,7 +101,7 @@ let make = () => {
         };
       };
 
-      let observer = ObserveResize.observeResize(canvasCellId, sendUpdate);
+      let observer = ObserveResize.observeResize(canvasLayoutProbeDivId, sendUpdate);
       Some(() => ObserveResize.unobserve(observer));
     },
     ((), ()),
@@ -114,18 +114,23 @@ let make = () => {
   <div className="leftCell"/>
   
   <div className="canvasCell">
-  <canvas className="mainCanvas"
+  <div className="mainCanvasBorder">
+  <canvas
     ref={ReactDOMRe.Ref.callbackDomRef(elem =>
       React.Ref.setCurrent(canvasElementRef, Js.Nullable.toOption(elem))
     )}
   />
+  </div>
   </div>
 
   <div className="rightCell"/>
   </div>
 
   <div className="canvasProbeRow">
-  <div id={canvasCellId} className="canvasProbeCell">
+  <div className="leftCell"/>
+  <div className="canvasProbeCell">
+  <div id={canvasLayoutProbeDivId} className="canvasProbeDiv">
+  </div>
   </div>
   </div>  
   </>;

@@ -3,7 +3,7 @@ open ReactUtil;
 open SetUtil;
 
 type appComponent =
-  | NoteInfoStrips
+  | CodeEditor
   | CanvasExperiment;
 
 type appTopLevelCommand =
@@ -25,7 +25,7 @@ type appTopLevelState = {
   debugModes: DebugMode.debugModes,
 };
 
-let initialComponents = Set.fromArray([|CanvasExperiment|], ~id=(module AppComponentComparable));
+let initialComponents = Set.fromArray([|CanvasExperiment, CodeEditor|], ~id=(module AppComponentComparable));
 
 let initial: appTopLevelState = {appComponents: initialComponents, debugModes: DebugMode.initial};
 
@@ -47,7 +47,7 @@ let debugKeyboardListenerEffect = (dispatch: dispatch, _): option(unit => unit) 
         let code = code(event);
         switch (code) {
         | "KeyC" => dispatch(ToggleAppComponent(CanvasExperiment))
-        | "KeyS" => dispatch(ToggleAppComponent(NoteInfoStrips))
+        | "KeyE" => dispatch(ToggleAppComponent(CodeEditor))
         | "KeyZ" => dispatch(ToggleDebugMode(NoteInfoStrips2xZoom))
         | _ => ()
         };
@@ -80,13 +80,13 @@ let make = () => {
   React.useEffect2(timerUpdateEffect(true, CodeCanvasState.dispatch), ((), true));
 
   let elements: list(reactComponent) = [
-    if (Set.has(state.appComponents, CanvasExperiment)) {
-      <CanvasExperiment key="canvasExperiment"/>;
+    if (Set.has(state.appComponents, CodeEditor)) {
+      <CodeEditor/>;
     } else {
       emptyFragment;
-    },
-    if (Set.has(state.appComponents, NoteInfoStrips)) {
-      <p>{ReasonReact.string("foo")}</p>;
+    },  
+    if (Set.has(state.appComponents, CanvasExperiment)) {
+      <CanvasExperiment key="canvasExperiment"/>;
     } else {
       emptyFragment;
     },

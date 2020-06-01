@@ -57,6 +57,12 @@ body {
 
 %canvasCellCommon {
     border-style: solid;
+    border-color: $background; // $dark
+    border-width: 1px;
+}
+
+%componentBorder {
+    border-style: solid;
     border-color: $dark;
     border-width: 1px;
 }
@@ -66,7 +72,8 @@ body {
     @extend %canvasCellCommon;
 }
 
-.mainCanvas {
+.mainCanvasBorder {
+    @extend %componentBorder;
     background-color: $darkerBackground;
 }
 
@@ -81,5 +88,22 @@ body {
 .canvasProbeCell {
     @extend %mainContentCell;
     @extend %canvasCellCommon;
-    border-color: $background;
+}
+
+.canvasProbeDiv {
+    @extend %componentBorder;
+    border-color: transparent;
+}
+
+.codeEditorRow {
+    @extend %mainGrid;
+}
+
+.codeEditor {
+    width: 100%;
+}
+
+.codeEditorCell {
+    @extend %mainContentCell;
+    @extend %canvasCellCommon;
 }
