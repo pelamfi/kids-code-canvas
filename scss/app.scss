@@ -55,12 +55,6 @@ body {
     @extend %sideContentCell;
 }
 
-%canvasCellCommon {
-    border-style: solid;
-    border-color: $background; // $dark
-    border-width: 1px;
-}
-
 %componentBorder {
     border-style: solid;
     border-color: $dark;
@@ -69,7 +63,6 @@ body {
 
 .canvasCell {
     @extend %mainContentCell;
-    @extend %canvasCellCommon;
 }
 
 .mainCanvasBorder {
@@ -87,7 +80,6 @@ body {
 
 .canvasProbeCell {
     @extend %mainContentCell;
-    @extend %canvasCellCommon;
 }
 
 .canvasProbeDiv {
@@ -105,5 +97,4 @@ body {
 
 .codeEditorCell {
     @extend %mainContentCell;
-    @extend %canvasCellCommon;
 }
