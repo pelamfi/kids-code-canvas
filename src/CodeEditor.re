@@ -10,7 +10,7 @@ let make = () => {
   <div className="leftCell"/>
   
   <div className="codeEditorCell">
-    <textarea className="codeEditor" onChange={onChange}>{React.string("x = t")}</textarea>
+    <textarea className="codeEditor" onChange={onChange} defaultValue="x = t"></textarea>
   </div>
   </div>;
 };

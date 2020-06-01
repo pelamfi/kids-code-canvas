@@ -28,11 +28,21 @@ type evalFunction = (float) => evalState;
 let createEvalFunctionJs: (string) => evalFunction = [%bs.raw
   {|
 function createEvalFunction(scriptlet) {
-    var compiled = new Function("t", scriptlet);
-    return (t) => {
-        var result = compiled(t);
-        var asRecord = evalStateFromJs(result);
-        return asRecord;
+    try {  
+      var compiled = new Function("t", scriptlet);
+      return (t) => {
+          try {  
+            var result = compiled(t);
+            var asRecord = evalStateFromJs(result);
+            return asRecord;
+          } catch (exception) {
+            console.log(exception);
+            return (t) => ({x: t, y: 0, r: 1, g: 0, b: 0});
+          }          
+      }
+    } catch (exception) {
+      console.log(exception);
+      return (t) => ({x: t, y: 0, r: 1, g: 0, b: 0});
     }
 }
 |}
@@ -43,7 +53,6 @@ let createEvalFunction = (scriplet: string): evalFunction => {
   createEvalFunctionJs(combinedScript);
 };
 
-let initial = createEvalFunction("x = t * 0.1 + (cos(t*9)+cos(t*2)) * 0.5; y = (sin(t*9)+sin(t*2)) * 0.5; sininen = cos(t * 3); vihrea = 0.5; punainen = sin(t)");
+let initial = createEvalFunction("");
 
 let initialState = createEvalFunction("")(0.0);
-

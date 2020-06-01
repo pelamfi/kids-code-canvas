@@ -80,3 +80,16 @@ Install heroku command line tool.
   git remote add heroku https://git.heroku.com/pelam-kids-code-canvas.git
 
   git subtree push --prefix server heroku master
+
+
+## Collection of scriptlets
+
+    x = sin(t * 3) + t * 0.2;y = cos(t * 3)
+
+    x = t * 0.1 + (cos(t*9)+cos(t*2)) * 0.5; y = (sin(t*9)+sin(t*2)) * 0.5; sininen = cos(t * 3); vihrea = 0.5; punainen = sin(t)    
+
+
+    x = sin(t * 3) + t * 0.25;y = cos(t * 3)
+    if (t % 2 < 1) {
+      x = t * 0.1 + (cos(t*9)+cos(t*2)) * 0.5; y = (sin(t*9)+sin(t*2)) * 0.5; sininen = cos(t * 3); vihrea = 0.5; punainen = sin(t)
+    }
