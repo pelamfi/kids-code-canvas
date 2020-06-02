@@ -6,15 +6,15 @@ let flooredDivisionRemainder = (a: int, b: int): int => {
 let flooredDivisionRemainderFloat: (float, float) => float = [%bs.raw
   {|
 function flooredDivisionRemainderF(a, b) {
-  return a % b;
+  return (a % b + b) % b;
 }
 |}]
 
-let minInt = (a: int, b: int): int => a < b ? a : b;
+let clampInt = (minValue: int, maxValue: int, value: int): int => max(minValue, min(maxValue, value))
 
-let maxInt = (a: int, b: int): int => a > b ? a : b;
+let clamp = (minValue: float, maxValue: float, value: float): float => max(minValue, min(maxValue, value))
 
-let clampInt = (min: int, max: int, value: int): int => maxInt(min, minInt(max, value))
+let notchAt1 = (value: float): float => value == 1.0 ? 0.999999999999 : value
 
 let pi = [%bs.raw{| Math.PI |}]
 

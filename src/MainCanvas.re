@@ -30,19 +30,20 @@ let drawOnCanvas =
   let frameRenderCount = MathUtil.clampInt(0, 60, state.expectedFrameCount - state.frameCount);
 
   RangeOfInt.map(frame => {
+    open MathUtil;  
     let t = float_of_int(frame) *. AnimationConstants.targetFrameInterval;
     let renderState: Scriptlet.scriptletState = state.scriptletFunction(t);
-    let xUnit: unitT = {value: MathUtil.flooredDivisionRemainderFloat(renderState.x *. 0.999999999 /. 2.0 +. 0.5 *. widerThanHigher, widerThanHigher)};
-    let yUnit: unitT = {value: MathUtil.flooredDivisionRemainderFloat(renderState.y *. 0.999999999 /. 2.0 +. 0.5, 1.0)};
-    let r = unitMod(renderState.r *. 0.999999999) *. 256.0;
-    let g = unitMod(renderState.g *. 0.999999999) *. 256.0;
-    let b = unitMod(renderState.b *. 0.999999999) *. 256.0;
-    let x = lerp(0.0, h, xUnit);
+    let xUnit: unitT = wrappingMinusAToPlusAToUnit(renderState.x, widerThanHigher);
+    let yUnit: unitT = wrappingMinusAToPlusAToUnit(notchAt1(renderState.y), 1.0);
+    let r = abs_float(unitMod(renderState.r *. 0.999999999999)) *. 256.0;
+    let g = abs_float(unitMod(renderState.g *. 0.999999999999)) *. 256.0;
+    let b = abs_float(unitMod(renderState.b *. 0.999999999999)) *. 256.0;
+    let radius = clamp(0.0, w *. 2.0, lerp(0.0, h, {value: renderState.radius}));
+    let x = lerp(0.0, w, xUnit);
     let y = lerp(h, 0.0, yUnit);
-    let f = w /. 100.0
     setFillStyle(c, String, Printf.sprintf("rgba(%f,%f,%f,%f)", r, g, b, 1.0));
     beginPath(c);
-    arc(~x = x, ~y = y, ~r = f, ~startAngle=0.0, ~endAngle = MathUtil.pi *. 2.0, ~anticw=false, c);
+    arc(~x = x, ~y = y, ~r = radius, ~startAngle=0.0, ~endAngle = MathUtil.pi *. 2.0, ~anticw=false, c);
     fill(c);
     // fillRect(c, ~x=x, ~y=y, ~w=4.0, ~h=4.0);
     dispatchCanvasEvent(FrameRendered);

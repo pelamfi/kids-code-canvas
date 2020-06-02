@@ -26,6 +26,8 @@ let unitTMod = (t: unitT): unitT => {value: MathUtil.flooredDivisionRemainderFlo
 
 let unitMod = (t: float): float => MathUtil.flooredDivisionRemainderFloat(t, 1.0)
 
+let wrappingMinusAToPlusAToUnit = (a: float, b: float): unitT => {value: MathUtil.flooredDivisionRemainderFloat(a +. b, b *. 2.0) /. (b *. 2.0)}
+
 let tOfDuration = (fromStart: msDuration, total: msDuration): unitT => {
   {value: fromStart.value /. total.value}
 }
