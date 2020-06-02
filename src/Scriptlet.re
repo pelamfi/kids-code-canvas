@@ -33,7 +33,7 @@ let compileScriptletJs: (string) => scriptletFunction = [%bs.raw
 function compileScriptletJs(scriptlet) {
     var errorFunc = (t) => scriptletStateFromJs({x: 0, y: 0, r: 0.9, g: 0.3, b: 0.3, radius: 0.05});
     try {  
-      var compiled = new Function("t", scriptlet);
+      var compiled = new Function("t", scriptlet.toLowerCase());
       return (t) => {
           try {  
             var result = compiled(t);
