@@ -24,7 +24,6 @@ $background: $brightBackground;
 // https://stackoverflow.com/a/52685817/1148030
 // Also see the meta viewport in index.html
 body {
-    touch-action: none;
     background-color: $background;
     color: $dark;
 }
