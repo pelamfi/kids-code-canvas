@@ -97,29 +97,25 @@ Install heroku command line tool.
 
     x = t * 1001.12;y = t * pi;punainen = t * 33;sininen = t;vihrea = t
 
-    säde = 2
+    koko = 2
     punainen = 1
     sininen = 1
     vihreä = 1
     if (t > 0.1) punainen = 0
     if (t > 0.1) sininen = 1
     if (t > 0.1) vihreä = 0
-    if (t > 0.1) säde = 0.12
+    if (t > 0.1) koko = 0.12
     if (t > 0.1) x = t
-    if (t > 3.6) x = -0.4
-    if (t > 3.6) y = t
-
+    if (t > 3.7) x = -0.4
+    if (t > 3.7) y = t
 
     x = t
     y = t
     punainen = t
     vihreä = t
     sininen = t
-    /*
-    punainen = 1
-    sininen = 1
-    vihreä = 1 
-    koko = 9
-    if (t > 0.2) koko = 0.1
-    if (t > 0.2) punainen = 0
-    if (t > 0.2) vihreä = 0*/
+
+    y = random() * 100
+    x = random() * 100
+    vihreä = sin(t)
+    koko = random() / 5
