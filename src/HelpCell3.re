@@ -4,9 +4,9 @@
 let make = () => {
   <div className="helpCell">
   <dl>
-  <dt>{React.string("punainen")}</dt><dd>{React.string({js|punaisen värin osuus|js})}</dd>
-  <dt>{React.string("sininen")}</dt><dd>{React.string({js|sinisen värin osuus|js})}</dd>
-  <dt>{React.string("vihrea")}</dt><dd>{React.string({js|vihrean värin osuus|js})}</dd>
+  <dt>{React.string("punainen")}</dt><dd>{React.string({js|punaisen värin osuus 0:sta 1:een|js})}</dd>
+  <dt>{React.string("sininen")}</dt><dd>{React.string({js|sinisen värin osuus 0:sta 1:een|js})}</dd>
+  <dt>{React.string({js|vihreä|js})}</dt><dd>{React.string({js|vihrean värin osuus 0:sta 1:een|js})}</dd>
   </dl>
   </div>
 };
