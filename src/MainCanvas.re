@@ -6,12 +6,14 @@ open Belt;
 type canvasState = {frameCount: int, expectedFrameCount: int, scriptletFunction: Scriptlet.scriptletFunction};
 
 type canvasEvent = 
-  | FrameRendered
+  | FramesRendered(int)
   | Redraw
   | ExpectedFrameCount(int)
   | SetScriptletFunction(Scriptlet.scriptletFunction);
 
 let initialCanvasState = {frameCount: 0, expectedFrameCount: 0, scriptletFunction: Scriptlet.initial};
+
+let maxFramesFastForward = 60 * 30;
 
 let drawOnCanvas =
     (state: canvasState, dispatchCanvasEvent: (canvasEvent) => unit, context: canvasDrawContext): unit => {
@@ -27,7 +29,13 @@ let drawOnCanvas =
 
   let widerThanHigher = w /. h;
 
-  let frameRenderCount = MathUtil.clampInt(0, 60, state.expectedFrameCount - state.frameCount);
+  let totalFrameRenderCount = state.expectedFrameCount - state.frameCount;
+
+  let frameRenderCount = MathUtil.clampInt(0, 60, totalFrameRenderCount);
+
+  if (totalFrameRenderCount > maxFramesFastForward) {
+    dispatchCanvasEvent(FramesRendered(totalFrameRenderCount - maxFramesFastForward));
+  }
 
   RangeOfInt.map(frame => {
     open MathUtil;  
@@ -46,7 +54,7 @@ let drawOnCanvas =
     arc(~x = x, ~y = y, ~r = radius, ~startAngle=0.0, ~endAngle = MathUtil.pi *. 2.0, ~anticw=false, c);
     fill(c);
     // fillRect(c, ~x=x, ~y=y, ~w=4.0, ~h=4.0);
-    dispatchCanvasEvent(FrameRendered);
+    dispatchCanvasEvent(FramesRendered(1));
   }, RangeOfInt.make(state.frameCount, state.frameCount + frameRenderCount)) |> ignore;
 };
 
@@ -54,7 +62,7 @@ let updateState = (state: canvasState, event: canvasEvent): canvasState => {
   switch(event) {
     | Redraw => {...state, frameCount: 0}
     | ExpectedFrameCount(c) => {...state, expectedFrameCount: c}
-    | FrameRendered => {...state, frameCount: state.frameCount + 1}
+    | FramesRendered(c) => {...state, frameCount: state.frameCount + c}
     | SetScriptletFunction(f) => {scriptletFunction: f, frameCount: 0, expectedFrameCount: 0}
   }
 };
