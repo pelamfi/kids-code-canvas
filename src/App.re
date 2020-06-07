@@ -9,6 +9,7 @@ type appComponent =
 
 type appTopLevelCommand =
   | Login(string)
+  | LoginSuccess
   | Url(ReasonReactRouter.url)
   | ToggleAppComponent(appComponent)
   | ToggleDebugMode(DebugMode.debugMode);
@@ -25,7 +26,8 @@ module AppComponentComparable =
 type appComponents = Set.t(appComponent, AppComponentComparable.identity);
 
 type appMainView = 
-  | Login
+  | Login(string)
+  | LoggingIn(string, string)
   | Coding(appComponents)
 
 type appTopLevelState = {
@@ -40,29 +42,35 @@ let initialComponents = Set.fromArray([|CanvasExperiment, CodeEditor, Help|], ~i
 let urlPath = (urlPath: list(string)): string => 
   Js.Array.joinWith("/", Belt.List.toArray(urlPath));
 
-let initial: appTopLevelState = {appMainView: Login, urlPath: urlPath([]), debugModes: DebugMode.initial};
+let initial: appTopLevelState = {appMainView: Coding(initialComponents), urlPath: urlPath([]), debugModes: DebugMode.initial};
 
 let appTopLevelStateReducer = (prev: appTopLevelState, command: appTopLevelCommand): appTopLevelState => {
-  switch (command) {
-    | Url(url) => 
+  switch (prev.appMainView, command) {
+    | (_, Url(url)) => 
       switch(url.path) {
-        | ["workshop", "eb039e58-748a-406e-a6cb-cdfdf660d866"] | ["workshoptest"]=> // workshop mode, ask user name
-          {...prev, urlPath: urlPath(["workshop", "eb039e58-748a-406e-a6cb-cdfdf660d866"]), appMainView: Login}
-        | ["workshop", "eb039e58-748a-406e-a6cb-cdfdf660d866", user] | [user] => // workshop mode with user name
-          CodeCanvasState.dispatch(CodeCanvasState.Login(user));
-          {...prev, urlPath: urlPath(["workshop", "eb039e58-748a-406e-a6cb-cdfdf660d866", user]), appMainView: Coding(initialComponents)}
+        | [test] when test == "logintest" => // test login
+          {...prev, appMainView: LoggingIn("eb039e58-748a-406e-a6cb-cdfdf660d866", "logintest")}
+        | [test] when test == "workshoptest" => // test tworkshop login page
+          {...prev, appMainView: Login("eb039e58-748a-406e-a6cb-cdfdf660d866")}
+        | ["workshop", workshopId] => // workshop mode, ask user name
+          {...prev, appMainView: Login(workshopId)}
+        | ["workshop", workshopId, user] => // workshop mode with user name
+          {...prev, appMainView: LoggingIn(workshopId, user)}
         | _ =>
           {...prev, urlPath: urlPath([]), appMainView: Coding(initialComponents)} // no backend, non workshop mode
       }
-    | Login(loginName) =>  
+    | (Login(workshopId), Login(loginName)) =>  
+      {...prev, urlPath: urlPath(["workshop", workshopId, loginName]), appMainView: LoggingIn(workshopId, loginName)}
+    | (LoggingIn(workshopId, loginName), LoginSuccess) =>  
       CodeCanvasState.dispatch(CodeCanvasState.Login(loginName));
-      {...prev, urlPath: urlPath(["workshop", "eb039e58-748a-406e-a6cb-cdfdf660d866", loginName]), appMainView: Coding(initialComponents)}
-    | ToggleAppComponent(component) => 
-    switch (prev.appMainView) {
-      | Login => prev
-      | Coding(appComponents) => {...prev, appMainView: Coding(setToggle(appComponents, component))}
-    }
-  | ToggleDebugMode(mode) => {...prev, debugModes: setToggle(prev.debugModes, mode)}
+      {...prev, urlPath: urlPath(["workshop", workshopId, loginName]), appMainView: Coding(initialComponents)}
+    | (_, ToggleAppComponent(component)) => 
+      switch (prev.appMainView) {
+        | Coding(appComponents) => {...prev, appMainView: Coding(setToggle(appComponents, component))}
+        | _ => prev
+      }
+    | (_, ToggleDebugMode(mode)) => {...prev, debugModes: setToggle(prev.debugModes, mode)}
+    | _ => prev
   };
 };
 
@@ -106,7 +114,8 @@ let make = () => {
 
   let elements: list(reactComponent) =
     switch (state.appMainView) {
-      | Login => [<Login key="login" loginFunction={(loginName) => dispatchCommand(Login(loginName))}/>]
+      | Login(_) => [<Login key="login" loginFunction={(loginName) => dispatchCommand(Login(loginName))}/>]
+      | LoggingIn(_, _) => [ReasonReact.string("loggingIn")]
       | Coding(appComponents) => [
         if (Set.has(appComponents, CanvasExperiment)) {
           <MainCanvas key="mainCanvas"/>;
@@ -114,7 +123,7 @@ let make = () => {
           emptyFragment;
         },    
         if (Set.has(appComponents, CodeEditor)) {
-          <CodeEditor key="codeEditor"/>;
+          <CodeEditor key="codeEditor"/>
         } else {
           emptyFragment;
         },  

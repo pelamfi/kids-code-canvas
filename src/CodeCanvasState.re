@@ -2,10 +2,18 @@ open Note;
 open SynthState;
 open AnimationConstants;
 
+type scriptlet = {
+  scriptlet: string,  
+  evalFunction: Scriptlet.scriptletFunction,
+  loginName: string,
+}
+
+let initialScriptlet = {scriptlet: "", evalFunction: Scriptlet.initial, loginName: ""}
+
 type stateChange =
   | Voice(voice)
   | RenderFramesTo(int)
-  | ScriptletFunctionChanged(Scriptlet.scriptletFunction)
+  | ScriptletFunctionChanged(scriptlet)
   | CurrentNoteChanged(note);
 
 type listener = stateChange => unit;
@@ -19,10 +27,9 @@ type state = {
   updateIndex: int,
   frameTimes: option(frameTimes),
   expectedFrameCount: int,
-  evalFunction: Scriptlet.scriptletFunction,
+  scriptlet: scriptlet,
   listeners: list(stateChange => unit),
   lastUpdate: list(stateChange),
-  loginName: string
 };
 
 let expectedAnimFrameCount = (times: frameTimes): int => int_of_float((times.lastMs -. times.firstMs) /. targetFrameIntervalMs)
@@ -31,10 +38,9 @@ let initialState: state = {
   updateIndex: 0,
   frameTimes: None,
   expectedFrameCount: 0,
-  evalFunction: Scriptlet.initial,
+  scriptlet: initialScriptlet,
   listeners: [],
   lastUpdate: [],
-  loginName: ""
 };
 
 type event =
@@ -56,12 +62,17 @@ let updateState = (prevState: state, event: event): state => {
   let newState: state =
     switch (event) {
     | Login(loginName) => {
-      {...initialState, loginName}
+      {...initialState, scriptlet: {...initialScriptlet, loginName}}
     }
     | ChangeScriptlet(scriptletString) => {
       let evalFunction = Scriptlet.compileScriptlet(scriptletString);
       let expectedFrameCount = 0;
-      {...state, evalFunction, frameTimes: None, expectedFrameCount, lastUpdate: [RenderFramesTo(expectedFrameCount), ScriptletFunctionChanged(evalFunction)]}
+      let scriptlet = {...state.scriptlet, scriptlet: scriptletString, evalFunction};
+      {...state, 
+        scriptlet, 
+        frameTimes: None, 
+        expectedFrameCount, 
+        lastUpdate: [RenderFramesTo(expectedFrameCount), ScriptletFunctionChanged(scriptlet)]}
     }
     | AnimationFrame(frameMs) => {
       let firstMs: float = Belt.Option.map(state.frameTimes, t => t.firstMs) |> OptionUtil.getWithDefaultF(() => frameMs);  

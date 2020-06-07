@@ -3,15 +3,15 @@ open CanvasUtil;
 open AnimationUtil;
 open Belt;
 
-type canvasState = {frameCount: int, expectedFrameCount: int, scriptletFunction: Scriptlet.scriptletFunction};
+type canvasState = {frameCount: int, expectedFrameCount: int, scriptlet: CodeCanvasState.scriptlet};
 
 type canvasEvent = 
   | FramesRendered(int)
   | Redraw
   | ExpectedFrameCount(int)
-  | SetScriptletFunction(Scriptlet.scriptletFunction);
+  | SetScriptletFunction(CodeCanvasState.scriptlet);
 
-let initialCanvasState = {frameCount: 0, expectedFrameCount: 0, scriptletFunction: Scriptlet.initial};
+let initialCanvasState = {frameCount: 0, expectedFrameCount: 0, scriptlet: CodeCanvasState.initialScriptlet};
 
 let maxFramesFastForward = 60 * 30;
 
@@ -40,7 +40,7 @@ let drawOnCanvas =
   RangeOfInt.map(frame => {
     open MathUtil;  
     let t = float_of_int(frame) *. AnimationConstants.targetFrameInterval;
-    let renderState: Scriptlet.scriptletState = state.scriptletFunction(t);
+    let renderState: Scriptlet.scriptletState = state.scriptlet.evalFunction(t);
     let xUnit: unitT = wrappingMinusAToPlusAToUnit(renderState.x, widerThanHigher);
     let yUnit: unitT = wrappingMinusAToPlusAToUnit(notchAt1(renderState.y), 1.0);
     let r = abs_float(unitMod(renderState.r *. 0.999999999999)) *. 256.0;
@@ -63,7 +63,7 @@ let updateState = (state: canvasState, event: canvasEvent): canvasState => {
     | Redraw => {...state, frameCount: 0}
     | ExpectedFrameCount(c) => {...state, expectedFrameCount: c}
     | FramesRendered(c) => {...state, frameCount: state.frameCount + c}
-    | SetScriptletFunction(f) => {scriptletFunction: f, frameCount: 0, expectedFrameCount: 0}
+    | SetScriptletFunction(s) => {scriptlet: s, frameCount: 0, expectedFrameCount: 0}
   }
 };
 
@@ -72,7 +72,7 @@ let codeCanvasStateChangeListenerEffect =
   CodeCanvasState.listenerEffect(stateChange =>
     switch (stateChange) {
     | RenderFramesTo(frame) => dispatchCanvasEvent(ExpectedFrameCount(frame))
-    | ScriptletFunctionChanged(evalFunc) => dispatchCanvasEvent(SetScriptletFunction(evalFunc))
+    | ScriptletFunctionChanged(scriptlet) => dispatchCanvasEvent(SetScriptletFunction(scriptlet))
     | _ => ()
     }
   );
@@ -117,11 +117,15 @@ let make = () => {
   );
 
   React.useEffect0(codeCanvasStateChangeListenerEffect(dispatchCanvasEvent, CodeCanvasState.dispatch));
+
+  let workshopInfo: list(React.element) = if (canvasState.scriptlet.loginName != "") {
+    [<div className="workshopInfo">{React.string(canvasState.scriptlet.loginName)}</div>];
+  } else {
+    [];
+  };
+
   <>
-  //<div className="canvasWrapperCell">
-  //<div className="canvasGrid">
-  //<div className="leftCell"/>
-  
+  {ReactUtil.asReact(workshopInfo)}
   <div className="canvasCell">
   <div className="mainCanvasBorder">
   <canvas
@@ -131,9 +135,5 @@ let make = () => {
   />
   </div>
   </div>
-
-
-  //</div>
-  //</div>
-  </>;
+  </>
 };
