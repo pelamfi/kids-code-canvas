@@ -14,17 +14,18 @@
   "author": "Peter Lamberg",
   "license": "UNLICENSED",
   "dependencies": {
-    "foundation-sites": "^6.5.3",
-    "sass-loader": "^8.0.0",
-    "style-loader": "^1.0.0",
+    "@juggle/resize-observer": "^2.4.0",
+    "bs-fetch": "^0.5.2",
+    "bs-webapi": "^0.15.5",
     "css-loader": "^3.2.0",
+    "foundation-sites": "^6.5.3",
     "jquery": "^3.4.1",
     "node-sass": "^4.13.0",
-    "@juggle/resize-observer": "^2.4.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "reason-react": "^0.7.0",
-    "bs-webapi": "^0.15.5",
+    "sass-loader": "^8.0.0",
+    "style-loader": "^1.0.0",
     "tone": "^13.8.25"
   },
   "devDependencies": {
