@@ -20,7 +20,7 @@ let make = (~loginFunction: (string) => unit) => {
   <input className="loginName" placeholder="Etunimi" onChange=nameChangeHandler/>
   </div>
   <div className="loginButtonWrapper">
-    <a className="loginButton" onClick=loginHandler>
+    <a className={"loginButton " ++ (name == "" ?  " disabled" : "")} onClick=loginHandler>
       {React.string("Aloita")}
     </a>
   </div>
