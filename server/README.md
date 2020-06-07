@@ -1,3 +1,10 @@
+# Kids-Code-Canvas server
+
+## Testing locally
+
+    DATABASE_URL=$(heroku config:get DATABASE_URL) npm start
+
+
 # node-js-getting-started
 
 A barebones Node.js app using [Express 4](http://expressjs.com/).
