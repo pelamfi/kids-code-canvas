@@ -5,10 +5,11 @@ open AnimationConstants;
 type scriptlet = {
   scriptlet: string,  
   evalFunction: Scriptlet.scriptletFunction,
+  workshopId: string,
   loginName: string,
 }
 
-let initialScriptlet = {scriptlet: "", evalFunction: Scriptlet.initial, loginName: ""}
+let initialScriptlet = {scriptlet: "", evalFunction: Scriptlet.initial, workshopId: "", loginName: ""}
 
 type stateChange =
   | Voice(voice)
@@ -44,7 +45,7 @@ let initialState: state = {
 };
 
 type event =
-  | Login(string)
+  | Login(string, string)
   | ChangeScriptlet(string)
   | AnimationFrame(float)
   | RegisterListener(listener)
@@ -61,8 +62,8 @@ let updateState = (prevState: state, event: event): state => {
 
   let newState: state =
     switch (event) {
-    | Login(loginName) => {
-      {...initialState, scriptlet: {...initialScriptlet, loginName}}
+    | Login(workshopId, loginName) => {
+      {...initialState, scriptlet: {...initialScriptlet, workshopId, loginName}}
     }
     | ChangeScriptlet(scriptletString) => {
       let evalFunction = Scriptlet.compileScriptlet(scriptletString);

@@ -62,7 +62,7 @@ let appTopLevelStateReducer = (prev: appTopLevelState, command: appTopLevelComma
     | (Login(workshopId), Login(loginName)) =>  
       {...prev, urlPath: urlPath(["workshop", workshopId, loginName]), appMainView: LoggingIn(workshopId, loginName)}
     | (LoggingIn(workshopId, loginName), LoginSuccess) =>  
-      CodeCanvasState.dispatch(CodeCanvasState.Login(loginName));
+      CodeCanvasState.dispatch(CodeCanvasState.Login(workshopId, loginName));
       {...prev, urlPath: urlPath(["workshop", workshopId, loginName]), appMainView: Coding(initialComponents)}
     | (_, ToggleAppComponent(component)) => 
       switch (prev.appMainView) {
@@ -100,6 +100,13 @@ let debugKeyboardListenerEffect = (dispatch: dispatch, _): option(unit => unit) 
 };
 
 
+let isCoding = (appMainView: appMainView): bool => {
+  switch (appMainView) {
+    | Coding(_) => true
+    | _ => false
+  }
+};
+
 [@react.component]
 let make = () => {
   let (state, dispatchCommand) = React.useReducer(appTopLevelStateReducer, initial);
@@ -110,7 +117,11 @@ let make = () => {
 
   React.useEffect2(() => ReasonReactRouter.replace(state.urlPath) |> () => None, ((), state.urlPath));
 
-  React.useEffect2(TimerUpdateEffect.timerUpdateEffect(true, CodeCanvasState.dispatch), ((), true));
+  let isCoding = isCoding(state.appMainView);  
+
+  React.useEffect2(CodeSaveEffect.codeSaveEffect(isCoding), ((), isCoding));
+
+  React.useEffect2(TimerUpdateEffect.timerUpdateEffect(isCoding, CodeCanvasState.dispatch), ((), isCoding));
 
   let elements: list(reactComponent) =
     switch (state.appMainView) {
