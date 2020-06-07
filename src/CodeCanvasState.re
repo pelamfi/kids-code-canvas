@@ -22,6 +22,7 @@ type state = {
   evalFunction: Scriptlet.scriptletFunction,
   listeners: list(stateChange => unit),
   lastUpdate: list(stateChange),
+  loginName: string
 };
 
 let expectedAnimFrameCount = (times: frameTimes): int => int_of_float((times.lastMs -. times.firstMs) /. targetFrameIntervalMs)
@@ -33,9 +34,11 @@ let initialState: state = {
   evalFunction: Scriptlet.initial,
   listeners: [],
   lastUpdate: [],
+  loginName: ""
 };
 
 type event =
+  | Login(string)
   | ChangeScriptlet(string)
   | AnimationFrame(float)
   | RegisterListener(listener)
@@ -52,6 +55,9 @@ let updateState = (prevState: state, event: event): state => {
 
   let newState: state =
     switch (event) {
+    | Login(loginName) => {
+      {...initialState, loginName}
+    }
     | ChangeScriptlet(scriptletString) => {
       let evalFunction = Scriptlet.compileScriptlet(scriptletString);
       let expectedFrameCount = 0;

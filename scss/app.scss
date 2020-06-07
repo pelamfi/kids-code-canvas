@@ -11,6 +11,9 @@
 @include foundation-xy-grid-classes;
 @include foundation-typography;
 @include foundation-callout;
+@include foundation-button;
+@include foundation-forms;
+@include foundation-menu;
 
 $brightBackground: rgba(210, 225, 220, 255);
 $darkerBackground: rgba(4, 161, 170, 255);
@@ -19,6 +22,7 @@ $background: $brightBackground;
 
 #app {
     @extend .grid-container;
+    margin: 1em;
 } 
 
 // https://stackoverflow.com/a/52685817/1148030
@@ -30,8 +34,8 @@ body {
 
 .topLevelGrid {
     @extend .grid-x;
-    @extend .grid-padding-x;
-    padding: 1em;
+    @extend .grid-margin-x;
+    @extend .grid-margin-y;
 }
 
 %sideContentCell {
@@ -46,6 +50,12 @@ body {
     @extend .medium-8;
     @extend .large-8;
     @extend .cell;
+}
+
+.titleCell {
+    @extend .small-12;
+    @extend .medium-12;
+    @extend .large-12;
 }
 
 .leftCell {
@@ -106,3 +116,26 @@ body {
     width: 100%;
 }
 
+.loginInputs {
+    @extend .small-12;
+    @extend .medium-4;
+    @extend .large-4;
+}
+
+//.loginNamePrompt {
+//}
+
+.loginName {
+    @extend %mainContentCell;
+}
+
+.loginButtonWrapper {
+    @extend .small-12;
+    @extend .medium-4;
+    @extend .large-4;
+    @extend .cell
+}
+
+.loginButton {
+    @extend .button;
+}

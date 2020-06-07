@@ -8,10 +8,12 @@ type appComponent =
   | CanvasExperiment;
 
 type appTopLevelCommand =
+  | Login(string)
   | ToggleAppComponent(appComponent)
   | ToggleDebugMode(DebugMode.debugMode);
 
 // About Set: https://stackoverflow.com/a/58268653/1148030
+
 
 module AppComponentComparable =
   Id.MakeComparable({
@@ -21,18 +23,29 @@ module AppComponentComparable =
 
 type appComponents = Set.t(appComponent, AppComponentComparable.identity);
 
+type appMainView = 
+  | Login
+  | Coding(appComponents)
+
 type appTopLevelState = {
-  appComponents,
+  appMainView,
   debugModes: DebugMode.debugModes,
 };
 
 let initialComponents = Set.fromArray([|CanvasExperiment, CodeEditor, Help|], ~id=(module AppComponentComparable));
 
-let initial: appTopLevelState = {appComponents: initialComponents, debugModes: DebugMode.initial};
+let initial: appTopLevelState = {appMainView: Login, debugModes: DebugMode.initial};
 
 let appTopLevelStateReducer = (prev: appTopLevelState, command: appTopLevelCommand): appTopLevelState => {
   switch (command) {
-  | ToggleAppComponent(component) => {...prev, appComponents: setToggle(prev.appComponents, component)}
+    | Login(loginName) =>  
+      CodeCanvasState.dispatch(CodeCanvasState.Login(loginName));
+      {...prev, appMainView: Coding(initialComponents)}
+    | ToggleAppComponent(component) => 
+    switch (prev.appMainView) {
+      | Login => prev
+      | Coding(appComponents) => {...prev, appMainView: Coding(setToggle(appComponents, component))}
+    }
   | ToggleDebugMode(mode) => {...prev, debugModes: setToggle(prev.debugModes, mode)}
   };
 };
@@ -81,38 +94,38 @@ let make = () => {
   
   React.useEffect2(timerUpdateEffect(true, CodeCanvasState.dispatch), ((), true));
 
-  let elements: list(reactComponent) = [
-    if (Set.has(state.appComponents, CanvasExperiment)) {
-      <MainCanvas key="mainCanvas"/>;
-    } else {
-      emptyFragment;
-    },    
-    if (Set.has(state.appComponents, CodeEditor)) {
-      <CodeEditor key="codeEditor"/>;
-    } else {
-      emptyFragment;
-    },  
-    if (Set.has(state.appComponents, Help)) {
-      <HelpCell key="help1"/>;
-    } else {
-      emptyFragment;
-    },
-    if (Set.has(state.appComponents, Help)) {
-      <HelpCell2 key="help2"/>;
-    } else {
-      emptyFragment;
-    },  
-    if (Set.has(state.appComponents, Help)) {
-      <HelpCell3 key="help3"/>;
-    } else {
-      emptyFragment;
-    },  
-  ];
+  let elements: list(reactComponent) =
+    switch (state.appMainView) {
+      | Login => [<Login key="login" loginFunction={(loginName) => dispatchCommand(Login(loginName))}/>]
+      | Coding(appComponents) => [
+        if (Set.has(appComponents, CanvasExperiment)) {
+          <MainCanvas key="mainCanvas"/>;
+        } else {
+          emptyFragment;
+        },    
+        if (Set.has(appComponents, CodeEditor)) {
+          <CodeEditor key="codeEditor"/>;
+        } else {
+          emptyFragment;
+        },  
+        if (Set.has(appComponents, Help)) {
+          <>
+          <HelpCell key="help1"/>
+          <HelpCell2 key="help2"/>
+          <HelpCell3 key="help3"/>
+          </>
+        } else {
+          emptyFragment;
+          }
+        ]
+    };
 
   React.useEffect0(debugKeyboardListenerEffect(dispatchCommand));
 
   <> 
-  <div className="topLevelGrid">{asReact(elements)}
+  <div className="topLevelGrid">
+  <div className="titleCell"><h1>{React.string("Koodipaja")}</h1></div>
+  {asReact(elements)}
   <div className="canvasProbeCell">
   <div id="canvasLayoutProbe" className="canvasProbeDiv"/>
   </div>
