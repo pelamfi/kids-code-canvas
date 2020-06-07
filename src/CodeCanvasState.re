@@ -50,12 +50,21 @@ let emit = (state: state, stateChange: stateChange) => {
   Belt.List.forEach(state.listeners, listener => listener(stateChange));
 };
 
+let setWindowHistoryUrl: (string) => unit = [%bs.raw{|
+function setWindowHistoryUrl(part) {
+  window.history.pushState('page2', 'Title', '/' + part)
+}
+|}]
+
 let updateState = (prevState: state, event: event): state => {
   let state = {...prevState, updateIndex: prevState.updateIndex + 1, lastUpdate: []};
 
   let newState: state =
     switch (event) {
     | Login(loginName) => {
+
+      setWindowHistoryUrl(loginName);
+
       {...initialState, loginName}
     }
     | ChangeScriptlet(scriptletString) => {
