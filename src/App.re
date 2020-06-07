@@ -116,18 +116,21 @@ let make = () => {
           </>
         } else {
           emptyFragment;
-          }
+        }
         ]
     };
 
   React.useEffect0(debugKeyboardListenerEffect(dispatchCommand));
 
-  <> 
   <div className="topLevelGrid">
+  
   <div className="titleCell"><h1>{React.string("Koodipaja")}</h1></div>
+
   {asReact(elements)}
+
   <div className="canvasProbeCell">
   <div id="canvasLayoutProbe" className="canvasProbeDiv"/>
   </div>
-  </div></>;
+
+  </div>
 };
