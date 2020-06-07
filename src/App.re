@@ -9,6 +9,7 @@ type appComponent =
 
 type appTopLevelCommand =
   | Login(string)
+  | Url(ReasonReactRouter.url)
   | ToggleAppComponent(appComponent)
   | ToggleDebugMode(DebugMode.debugMode);
 
@@ -29,18 +30,33 @@ type appMainView =
 
 type appTopLevelState = {
   appMainView,
+  urlPath: string,
   debugModes: DebugMode.debugModes,
 };
 
 let initialComponents = Set.fromArray([|CanvasExperiment, CodeEditor, Help|], ~id=(module AppComponentComparable));
 
-let initial: appTopLevelState = {appMainView: Login, debugModes: DebugMode.initial};
+// Clear hash and query, since we are not using them now
+let urlPath = (urlPath: list(string)): string => 
+  Js.Array.joinWith("/", Belt.List.toArray(urlPath));
+
+let initial: appTopLevelState = {appMainView: Login, urlPath: urlPath([]), debugModes: DebugMode.initial};
 
 let appTopLevelStateReducer = (prev: appTopLevelState, command: appTopLevelCommand): appTopLevelState => {
   switch (command) {
+    | Url(url) => 
+      switch(url.path) {
+        | ["workshop", "eb039e58-748a-406e-a6cb-cdfdf660d866"] | ["workshoptest"]=> // workshop mode, ask user name
+          {...prev, urlPath: urlPath(["workshop", "eb039e58-748a-406e-a6cb-cdfdf660d866"]), appMainView: Login}
+        | ["workshop", "eb039e58-748a-406e-a6cb-cdfdf660d866", user] | [user] => // workshop mode with user name
+          CodeCanvasState.dispatch(CodeCanvasState.Login(user));
+          {...prev, urlPath: urlPath(["workshop", "eb039e58-748a-406e-a6cb-cdfdf660d866", user]), appMainView: Coding(initialComponents)}
+        | _ =>
+          {...prev, urlPath: urlPath([]), appMainView: Coding(initialComponents)} // no backend, non workshop mode
+      }
     | Login(loginName) =>  
       CodeCanvasState.dispatch(CodeCanvasState.Login(loginName));
-      {...prev, appMainView: Coding(initialComponents)}
+      {...prev, urlPath: urlPath(["workshop", "eb039e58-748a-406e-a6cb-cdfdf660d866", loginName]), appMainView: Coding(initialComponents)}
     | ToggleAppComponent(component) => 
     switch (prev.appMainView) {
       | Login => prev
@@ -75,24 +91,18 @@ let debugKeyboardListenerEffect = (dispatch: dispatch, _): option(unit => unit) 
   Some(() => EventTarget.removeKeyUpEventListener(keyUpListener, eventTarget));
 };
 
-type effectCleanup = unit => unit;
-
-type effect = unit => option(effectCleanup);
-
-let timerUpdateEffect = (isAnimating: bool, dispatch: (CodeCanvasState.event) => unit): effect => {
-  () =>
-    if (isAnimating) {
-      Some(GroupedRaf.register((timerMs: float) => dispatch(AnimationFrame(timerMs))));
-    } else {
-      None;
-    };
-};
 
 [@react.component]
 let make = () => {
   let (state, dispatchCommand) = React.useReducer(appTopLevelStateReducer, initial);
-  
-  React.useEffect2(timerUpdateEffect(true, CodeCanvasState.dispatch), ((), true));
+
+  let url = ReasonReactRouter.useUrl();
+
+  React.useEffect2(() => dispatchCommand(Url(url)) |> () => None, ((), url));
+
+  React.useEffect2(() => ReasonReactRouter.replace(state.urlPath) |> () => None, ((), state.urlPath));
+
+  React.useEffect2(TimerUpdateEffect.timerUpdateEffect(true, CodeCanvasState.dispatch), ((), true));
 
   let elements: list(reactComponent) =
     switch (state.appMainView) {
