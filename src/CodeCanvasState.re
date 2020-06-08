@@ -24,6 +24,7 @@ type stateChange =
   | Voice(voice)
   | RenderFramesTo(int)
   | ScriptletFunctionChanged(compiledScriptlet)
+  | LoggedIn(compiledScriptlet)
   | CurrentNoteChanged(note);
 
 type listener = stateChange => unit;
@@ -73,7 +74,7 @@ let updateState = (prevState: state, event: event): state => {
     switch (event) {
     | Login(scriptlet) => {
       let compiledScriptlet = compile(scriptlet);
-      {...initialState, compiledScriptlet}
+      {...initialState, compiledScriptlet, lastUpdate: [LoggedIn(compiledScriptlet)]}
     }
     | ChangeScriptlet(scriptletString) => {
       let scriptlet = {...state.compiledScriptlet.scriptlet, scriptletString};

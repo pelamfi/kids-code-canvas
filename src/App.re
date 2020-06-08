@@ -9,7 +9,7 @@ type appComponent =
 
 type appTopLevelCommand =
   | Login(string)
-  | LoginSuccess(string)
+  | LoginSuccess
   | Url(ReasonReactRouter.url)
   | ToggleAppComponent(appComponent)
   | ToggleDebugMode(DebugMode.debugMode);
@@ -32,6 +32,7 @@ type appTopLevelState = {
   appMainState,
   urlPath: string,
   debugModes: DebugMode.debugModes,
+  loggedIn: option((string, string))
 };
 
 let initialComponents = Set.fromArray([|CanvasExperiment, CodeEditor, Help|], ~id=(module AppComponentComparable));
@@ -40,28 +41,38 @@ let initialComponents = Set.fromArray([|CanvasExperiment, CodeEditor, Help|], ~i
 let urlPath = (urlPath: list(string)): string => 
   Js.Array.joinWith("/", Belt.List.toArray(urlPath));
 
-let initial: appTopLevelState = {appMainState: Coding(initialComponents), urlPath: urlPath([]), debugModes: DebugMode.initial};
+let initial: appTopLevelState = {
+  appMainState: Coding(initialComponents), 
+  urlPath: urlPath([]), 
+  debugModes: DebugMode.initial, 
+  loggedIn: None
+};
 
 let appTopLevelStateReducer = (prev: appTopLevelState, command: appTopLevelCommand): appTopLevelState => {
   switch (prev.appMainState, command) {
     | (_, Url(url)) => 
       switch(url.path) {
         | [test] when test == "logintest" => // test login
-          {...prev, appMainState: LoggingIn("eb039e58-748a-406e-a6cb-cdfdf660d866", "logintest")}
+          {...prev, loggedIn: None, appMainState: LoggingIn("eb039e58-748a-406e-a6cb-cdfdf660d866", "logintest")}
         | [test] when test == "workshoptest" => // test tworkshop login page
-          {...prev, appMainState: Login("eb039e58-748a-406e-a6cb-cdfdf660d866")}
+          {...prev, loggedIn: None, appMainState: Login("eb039e58-748a-406e-a6cb-cdfdf660d866")}
         | ["workshop", workshopId] => // workshop mode, ask user name
-          {...prev, appMainState: Login(workshopId)}
+          {...prev, loggedIn: None, appMainState: Login(workshopId)}
         | ["workshop", workshopId, user] => // workshop mode with user name
-          {...prev, appMainState: LoggingIn(workshopId, user)}
+          if (prev.loggedIn -> Belt.Option.mapWithDefault(false, t => t == (workshopId, user))) {
+            prev // logged in user info matches
+          } else {
+            // different user, or not logged in. Starting to login
+            {...prev, appMainState: LoggingIn(workshopId, user)} 
+          }
         | _ =>
-          {...prev, urlPath: urlPath([]), appMainState: Coding(initialComponents)} // no backend, non workshop mode
+          // no backend, non workshop mode
+          {...prev, loggedIn: None, urlPath: urlPath([]), appMainState: Coding(initialComponents)} 
       }
     | (Login(workshopId), Login(loginName)) =>  
       {...prev, urlPath: urlPath(["workshop", workshopId, loginName]), appMainState: LoggingIn(workshopId, loginName)}
-    | (LoggingIn(workshopId, loginName), LoginSuccess(scriptletString)) =>
-      CodeCanvasState.dispatch(CodeCanvasState.Login({workshopId, loginName, scriptletString}));
-      {...prev, urlPath: urlPath(["workshop", workshopId, loginName]), appMainState: Coding(initialComponents)}
+    | (LoggingIn(workshopId, loginName), LoginSuccess) =>
+      {...prev, loggedIn: Some((workshopId, loginName)), urlPath: urlPath(["workshop", workshopId, loginName]), appMainState: Coding(initialComponents)}
     | (_, ToggleAppComponent(component)) => 
       switch (prev.appMainState) {
         | Coding(appComponents) => {...prev, appMainState: Coding(setToggle(appComponents, component))}
@@ -108,6 +119,17 @@ let getLoggingIn = (appMainState: appMainState): option((string, string)) => swi
     | _ => None
 };
 
+let mainAppStateChangeListenerEffect =
+    (dispatch: dispatch): ((CodeCanvasState.acceptEvent, unit) => option(unit => unit)) => {
+  CodeCanvasState.listenerEffect(stateChange =>
+    switch (stateChange) {
+    | LoggedIn(_) => 
+      dispatch(LoginSuccess)
+    | _ => ()
+    }
+  );
+};
+
 [@react.component]
 let make = () => {
   let (state, dispatchCommand) = React.useReducer(appTopLevelStateReducer, initial);
@@ -124,9 +146,12 @@ let make = () => {
 
   React.useEffect2(TimerUpdateEffect.timerUpdateEffect(isCoding, CodeCanvasState.dispatch), ((), isCoding));
 
+  React.useEffect0(mainAppStateChangeListenerEffect(dispatchCommand, CodeCanvasState.dispatch));
+
   let loggingIn = getLoggingIn(state.appMainState)
 
-  React.useEffect2(LoginEffect.loginEffect(loggingIn, text => dispatchCommand(LoginSuccess(text))), ((), loggingIn));
+  React.useEffect2(LoginEffect.loginEffect(loggingIn, scriptlet =>
+    CodeCanvasState.dispatch(CodeCanvasState.Login(scriptlet))), ((), loggingIn));
 
   let elements: list(reactComponent) =
     switch (state.appMainState) {
