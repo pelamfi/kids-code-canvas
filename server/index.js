@@ -35,7 +35,7 @@ async function getScriptlet(req, res) {
             values ($1, $2, $3)`, [workshopId, userName, scriptlet]);
             res.send({scriptlet})
         } else {
-            res.send(rows[0])
+            res.send(rows[0].scriptlet)
         }
     } catch (error) {
         console.log("login error", workshopId, userName, error)    
