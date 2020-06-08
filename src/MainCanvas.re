@@ -11,7 +11,8 @@ type canvasEvent =
   | ExpectedFrameCount(int)
   | SetScriptletFunction(CodeCanvasState.compiledScriptlet);
 
-let initialCanvasState = {frameCount: 0, expectedFrameCount: 0, compiledScriptlet: CodeCanvasState.initialScriptlet};
+let initialCanvasState(compiledScriptlet: CodeCanvasState.compiledScriptlet) = 
+  {frameCount: 0, expectedFrameCount: 0, compiledScriptlet};
 
 let maxFramesFastForward = 60 * 30;
 
@@ -81,10 +82,10 @@ let codeCanvasStateChangeListenerEffect =
 let canvasLayoutProbeDivId = "canvasLayoutProbe";
 
 [@react.component]
-let make = () => {
+let make = (~compiledScriptlet: CodeCanvasState.compiledScriptlet) => {
   open React;
   let canvasElementRef: Ref.t(option(Dom.element)) = useRef(None);
-  let (canvasState, dispatchCanvasEvent) = React.useReducer(updateState, initialCanvasState);
+  let (canvasState, dispatchCanvasEvent) = React.useReducer(updateState, initialCanvasState(compiledScriptlet));
 
   useLayoutEffect2(() => {
     Ref.current(canvasElementRef)

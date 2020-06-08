@@ -9,7 +9,7 @@ type appComponent =
 
 type appTopLevelCommand =
   | Login(string)
-  | LoginSuccess
+  | LoginSuccess(CodeCanvasState.compiledScriptlet)
   | Url(ReasonReactRouter.url)
   | ToggleAppComponent(appComponent)
   | ToggleDebugMode(DebugMode.debugMode);
@@ -32,7 +32,7 @@ type appTopLevelState = {
   appMainState,
   urlPath: string,
   debugModes: DebugMode.debugModes,
-  loggedIn: option((string, string))
+  compiledScriptlet: CodeCanvasState.compiledScriptlet
 };
 
 let initialComponents = Set.fromArray([|CanvasExperiment, CodeEditor, Help|], ~id=(module AppComponentComparable));
@@ -45,7 +45,7 @@ let initial: appTopLevelState = {
   appMainState: Coding(initialComponents), 
   urlPath: urlPath([]), 
   debugModes: DebugMode.initial, 
-  loggedIn: None
+  compiledScriptlet: CodeCanvasState.initialScriptlet
 };
 
 let appTopLevelStateReducer = (prev: appTopLevelState, command: appTopLevelCommand): appTopLevelState => {
@@ -53,13 +53,13 @@ let appTopLevelStateReducer = (prev: appTopLevelState, command: appTopLevelComma
     | (_, Url(url)) => 
       switch(url.path) {
         | [test] when test == "logintest" => // test login
-          {...prev, loggedIn: None, appMainState: LoggingIn("eb039e58-748a-406e-a6cb-cdfdf660d866", "logintest")}
+          {...prev, compiledScriptlet: CodeCanvasState.initialScriptlet, appMainState: LoggingIn("eb039e58-748a-406e-a6cb-cdfdf660d866", "logintest")}
         | [test] when test == "workshoptest" => // test tworkshop login page
-          {...prev, loggedIn: None, appMainState: Login("eb039e58-748a-406e-a6cb-cdfdf660d866")}
+          {...prev, compiledScriptlet: CodeCanvasState.initialScriptlet, appMainState: Login("eb039e58-748a-406e-a6cb-cdfdf660d866")}
         | ["workshop", workshopId] => // workshop mode, ask user name
-          {...prev, loggedIn: None, appMainState: Login(workshopId)}
+          {...prev, compiledScriptlet: CodeCanvasState.initialScriptlet, appMainState: Login(workshopId)}
         | ["workshop", workshopId, user] => // workshop mode with user name
-          if (prev.loggedIn -> Belt.Option.mapWithDefault(false, t => t == (workshopId, user))) {
+          if ((prev.compiledScriptlet.scriptlet.workshopId, prev.compiledScriptlet.scriptlet.loginName) == (workshopId, user)) {
             prev // logged in user info matches
           } else {
             // different user, or not logged in. Starting to login
@@ -67,12 +67,12 @@ let appTopLevelStateReducer = (prev: appTopLevelState, command: appTopLevelComma
           }
         | _ =>
           // no backend, non workshop mode
-          {...prev, loggedIn: None, urlPath: urlPath([]), appMainState: Coding(initialComponents)} 
+          {...prev, compiledScriptlet: CodeCanvasState.initialScriptlet, urlPath: urlPath([]), appMainState: Coding(initialComponents)} 
       }
     | (Login(workshopId), Login(loginName)) =>  
       {...prev, urlPath: urlPath(["workshop", workshopId, loginName]), appMainState: LoggingIn(workshopId, loginName)}
-    | (LoggingIn(workshopId, loginName), LoginSuccess) =>
-      {...prev, loggedIn: Some((workshopId, loginName)), urlPath: urlPath(["workshop", workshopId, loginName]), appMainState: Coding(initialComponents)}
+    | (LoggingIn(workshopId, loginName), LoginSuccess(compiledScriptlet)) =>
+      {...prev, compiledScriptlet, urlPath: urlPath(["workshop", workshopId, loginName]), appMainState: Coding(initialComponents)}
     | (_, ToggleAppComponent(component)) => 
       switch (prev.appMainState) {
         | Coding(appComponents) => {...prev, appMainState: Coding(setToggle(appComponents, component))}
@@ -123,8 +123,8 @@ let mainAppStateChangeListenerEffect =
     (dispatch: dispatch): ((CodeCanvasState.acceptEvent, unit) => option(unit => unit)) => {
   CodeCanvasState.listenerEffect(stateChange =>
     switch (stateChange) {
-    | LoggedIn(_) => 
-      dispatch(LoginSuccess)
+    | LoggedIn(compiledScriptlet) => 
+      dispatch(LoginSuccess(compiledScriptlet))
     | _ => ()
     }
   );
@@ -162,12 +162,12 @@ let make = () => {
         ]
       | Coding(appComponents) => [
         if (Set.has(appComponents, CanvasExperiment)) {
-          <MainCanvas key="mainCanvas"/>;
+          <MainCanvas key="mainCanvas" compiledScriptlet=state.compiledScriptlet/>;
         } else {
           emptyFragment;
         },    
         if (Set.has(appComponents, CodeEditor)) {
-          <CodeEditor key="codeEditor"/>
+          <CodeEditor key="codeEditor" compiledScriptlet=state.compiledScriptlet/>
         } else {
           emptyFragment;
         },  

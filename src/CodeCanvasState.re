@@ -74,7 +74,7 @@ let updateState = (prevState: state, event: event): state => {
     switch (event) {
     | Login(scriptlet) => {
       let compiledScriptlet = compile(scriptlet);
-      {...initialState, compiledScriptlet, lastUpdate: [LoggedIn(compiledScriptlet)]}
+      {...initialState, compiledScriptlet, lastUpdate: [LoggedIn(compiledScriptlet), ScriptletFunctionChanged(compiledScriptlet)]}
     }
     | ChangeScriptlet(scriptletString) => {
       let scriptlet = {...state.compiledScriptlet.scriptlet, scriptletString};
