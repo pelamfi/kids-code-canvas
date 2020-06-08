@@ -1,6 +1,6 @@
 type a;
 
-let throttle = (func: 'a => unit, ~timeout = 1000): ('a => unit) => {
+let throttle = (timeout: int, func: 'a => unit): ('a => unit) => {
     let throttling = ref(false);
     (a: 'a) => {
         if (! throttling^) {
@@ -11,7 +11,7 @@ let throttle = (func: 'a => unit, ~timeout = 1000): ('a => unit) => {
     };
 };
 
-let debounce = (func: 'a => unit, ~timeout = 2000): ('a => unit) => {
+let debounce = (timeout: int, func: 'a => unit): ('a => unit) => {
     let timerHandle: ref(option(Js.Global.timeoutId)) = ref(None);
     (a: 'a) => {
         timerHandle^
