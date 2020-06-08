@@ -47,10 +47,11 @@ let drawOnCanvas =
     let r = abs_float(unitMod(renderState.r *. 0.999999999999)) *. 256.0;
     let g = abs_float(unitMod(renderState.g *. 0.999999999999)) *. 256.0;
     let b = abs_float(unitMod(renderState.b *. 0.999999999999)) *. 256.0;
+    let alpha = abs_float(unitMod(renderState.alpha *. 0.999999999999));
     let radius = clamp(0.0, w *. 2.0, lerp(0.0, h, {value: renderState.radius}));
     let x = lerp(0.0, w, xUnit);
     let y = lerp(h, 0.0, yUnit);
-    setFillStyle(c, String, Printf.sprintf("rgba(%f,%f,%f,%f)", r, g, b, 1.0));
+    setFillStyle(c, String, Printf.sprintf("rgba(%f,%f,%f,%f)", r, g, b, alpha));
     beginPath(c);
     arc(~x = x, ~y = y, ~r = radius, ~startAngle=0.0, ~endAngle = MathUtil.pi *. 2.0, ~anticw=false, c);
     fill(c);

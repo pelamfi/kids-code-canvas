@@ -119,3 +119,11 @@ Install heroku command line tool.
     x = random() * 100
     vihreä = sin(t)
     koko = random() / 5
+
+
+    x on t kertaa 2
+    y on t kertaa 6
+    punainen on aalto(t)
+    koko on aalto(t) / 3
+    sininen on aalto(t kertaa 1.4)
+    läpinäkyvyys on aalto(t)
