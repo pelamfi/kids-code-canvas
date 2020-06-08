@@ -120,7 +120,9 @@ let make = (~compiledScriptlet: CodeCanvasState.compiledScriptlet) => {
   React.useEffect0(codeCanvasStateChangeListenerEffect(dispatchCanvasEvent, CodeCanvasState.dispatch));
 
   let workshopInfo: list(React.element) = if (canvasState.compiledScriptlet.scriptlet.loginName != "") {
-    [<div key="workshopInfo" className="workshopInfo">{React.string(canvasState.compiledScriptlet.scriptlet.loginName)}</div>];
+    [<div key="workshopInfo" className="workshopInfo">
+      {React.string("Oma nimi: " ++ canvasState.compiledScriptlet.scriptlet.loginName)}
+    </div>];
   } else {
     [];
   };
