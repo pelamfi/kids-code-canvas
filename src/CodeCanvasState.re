@@ -3,18 +3,27 @@ open SynthState;
 open AnimationConstants;
 
 type scriptlet = {
-  scriptlet: string,  
-  evalFunction: Scriptlet.scriptletFunction,
+  scriptletString: string,  
   workshopId: string,
   loginName: string,
 }
 
-let initialScriptlet = {scriptlet: "", evalFunction: Scriptlet.initial, workshopId: "", loginName: ""}
+type compiledScriptlet = {
+  scriptlet: scriptlet,
+  evalFunction: Scriptlet.scriptletFunction
+}
+
+let compile = (scriptlet: scriptlet): compiledScriptlet => {
+  let evalFunction = Scriptlet.compileScriptlet(scriptlet.scriptletString);
+  {scriptlet, evalFunction}
+}
+
+let initialScriptlet = compile({scriptletString: "", workshopId: "", loginName: ""})
 
 type stateChange =
   | Voice(voice)
   | RenderFramesTo(int)
-  | ScriptletFunctionChanged(scriptlet)
+  | ScriptletFunctionChanged(compiledScriptlet)
   | CurrentNoteChanged(note);
 
 type listener = stateChange => unit;
@@ -28,7 +37,7 @@ type state = {
   updateIndex: int,
   frameTimes: option(frameTimes),
   expectedFrameCount: int,
-  scriptlet: scriptlet,
+  compiledScriptlet: compiledScriptlet,
   listeners: list(stateChange => unit),
   lastUpdate: list(stateChange),
 };
@@ -39,13 +48,13 @@ let initialState: state = {
   updateIndex: 0,
   frameTimes: None,
   expectedFrameCount: 0,
-  scriptlet: initialScriptlet,
+  compiledScriptlet: initialScriptlet,
   listeners: [],
   lastUpdate: [],
 };
 
 type event =
-  | Login(string, string)
+  | Login(scriptlet)
   | ChangeScriptlet(string)
   | AnimationFrame(float)
   | RegisterListener(listener)
@@ -62,18 +71,19 @@ let updateState = (prevState: state, event: event): state => {
 
   let newState: state =
     switch (event) {
-    | Login(workshopId, loginName) => {
-      {...initialState, scriptlet: {...initialScriptlet, workshopId, loginName}}
+    | Login(scriptlet) => {
+      let compiledScriptlet = compile(scriptlet);
+      {...initialState, compiledScriptlet}
     }
     | ChangeScriptlet(scriptletString) => {
-      let evalFunction = Scriptlet.compileScriptlet(scriptletString);
+      let scriptlet = {...state.compiledScriptlet.scriptlet, scriptletString};
+      let compiledScriptlet = compile(scriptlet)
       let expectedFrameCount = 0;
-      let scriptlet = {...state.scriptlet, scriptlet: scriptletString, evalFunction};
       {...state, 
-        scriptlet, 
+        compiledScriptlet, 
         frameTimes: None, 
         expectedFrameCount, 
-        lastUpdate: [RenderFramesTo(expectedFrameCount), ScriptletFunctionChanged(scriptlet)]}
+        lastUpdate: [RenderFramesTo(expectedFrameCount), ScriptletFunctionChanged(compiledScriptlet)]}
     }
     | AnimationFrame(frameMs) => {
       let firstMs: float = Belt.Option.map(state.frameTimes, t => t.firstMs) |> OptionUtil.getWithDefaultF(() => frameMs);  

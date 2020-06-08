@@ -3,15 +3,15 @@ open CanvasUtil;
 open AnimationUtil;
 open Belt;
 
-type canvasState = {frameCount: int, expectedFrameCount: int, scriptlet: CodeCanvasState.scriptlet};
+type canvasState = {frameCount: int, expectedFrameCount: int, compiledScriptlet: CodeCanvasState.compiledScriptlet};
 
 type canvasEvent = 
   | FramesRendered(int)
   | Redraw
   | ExpectedFrameCount(int)
-  | SetScriptletFunction(CodeCanvasState.scriptlet);
+  | SetScriptletFunction(CodeCanvasState.compiledScriptlet);
 
-let initialCanvasState = {frameCount: 0, expectedFrameCount: 0, scriptlet: CodeCanvasState.initialScriptlet};
+let initialCanvasState = {frameCount: 0, expectedFrameCount: 0, compiledScriptlet: CodeCanvasState.initialScriptlet};
 
 let maxFramesFastForward = 60 * 30;
 
@@ -40,7 +40,7 @@ let drawOnCanvas =
   RangeOfInt.map(frame => {
     open MathUtil;  
     let t = float_of_int(frame) *. AnimationConstants.targetFrameInterval;
-    let renderState: Scriptlet.scriptletState = state.scriptlet.evalFunction(t);
+    let renderState: Scriptlet.scriptletState = state.compiledScriptlet.evalFunction(t);
     let xUnit: unitT = wrappingMinusAToPlusAToUnit(renderState.x, widerThanHigher);
     let yUnit: unitT = wrappingMinusAToPlusAToUnit(notchAt1(renderState.y), 1.0);
     let r = abs_float(unitMod(renderState.r *. 0.999999999999)) *. 256.0;
@@ -63,7 +63,7 @@ let updateState = (state: canvasState, event: canvasEvent): canvasState => {
     | Redraw => {...state, frameCount: 0}
     | ExpectedFrameCount(c) => {...state, expectedFrameCount: c}
     | FramesRendered(c) => {...state, frameCount: state.frameCount + c}
-    | SetScriptletFunction(s) => {scriptlet: s, frameCount: 0, expectedFrameCount: 0}
+    | SetScriptletFunction(compiledScriptlet) => {compiledScriptlet, frameCount: 0, expectedFrameCount: 0}
   }
 };
 
@@ -118,8 +118,8 @@ let make = () => {
 
   React.useEffect0(codeCanvasStateChangeListenerEffect(dispatchCanvasEvent, CodeCanvasState.dispatch));
 
-  let workshopInfo: list(React.element) = if (canvasState.scriptlet.loginName != "") {
-    [<div className="workshopInfo">{React.string(canvasState.scriptlet.loginName)}</div>];
+  let workshopInfo: list(React.element) = if (canvasState.compiledScriptlet.scriptlet.loginName != "") {
+    [<div className="workshopInfo">{React.string(canvasState.compiledScriptlet.scriptlet.loginName)}</div>];
   } else {
     [];
   };

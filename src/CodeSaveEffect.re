@@ -13,7 +13,7 @@ let save = (scriptlet: CodeCanvasState.scriptlet): unit => {
         path,
         Fetch.RequestInit.make(
           ~method_=Post,
-          ~body=Fetch.BodyInit.make(scriptlet.scriptlet),
+          ~body=Fetch.BodyInit.make(scriptlet.scriptletString),
           ~headers=Fetch.HeadersInit.make({"Content-Type": "text/text"}),
           ()
         )
@@ -25,8 +25,8 @@ let codeSaveEffect = (isCoding: bool): effect => {
   let debounceSave = Throttle.debounce(save);  
   () => CodeCanvasState.listenerEffect(stateChange =>
     switch (stateChange) {
-    | ScriptletFunctionChanged(scriptlet) when isCoding =>
-      debounceSave(scriptlet);
+    | ScriptletFunctionChanged(compiledScriptlet) when isCoding =>
+      debounceSave(compiledScriptlet.scriptlet);
       ()
     | _ => ()
     }, CodeCanvasState.dispatch, ()

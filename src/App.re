@@ -9,7 +9,7 @@ type appComponent =
 
 type appTopLevelCommand =
   | Login(string)
-  | LoginSuccess
+  | LoginSuccess(string)
   | Url(ReasonReactRouter.url)
   | ToggleAppComponent(appComponent)
   | ToggleDebugMode(DebugMode.debugMode);
@@ -59,8 +59,8 @@ let appTopLevelStateReducer = (prev: appTopLevelState, command: appTopLevelComma
       }
     | (Login(workshopId), Login(loginName)) =>  
       {...prev, urlPath: urlPath(["workshop", workshopId, loginName]), appMainState: LoggingIn(workshopId, loginName)}
-    | (LoggingIn(workshopId, loginName), LoginSuccess) =>  
-      CodeCanvasState.dispatch(CodeCanvasState.Login(workshopId, loginName));
+    | (LoggingIn(workshopId, loginName), LoginSuccess(scriptletString)) =>
+      CodeCanvasState.dispatch(CodeCanvasState.Login({workshopId, loginName, scriptletString}));
       {...prev, urlPath: urlPath(["workshop", workshopId, loginName]), appMainState: Coding(initialComponents)}
     | (_, ToggleAppComponent(component)) => 
       switch (prev.appMainState) {
@@ -103,6 +103,11 @@ let isCoding = (appMainState: appMainState): bool => switch (appMainState) {
     | _ => false
 };
 
+let getLoggingIn = (appMainState: appMainState): option((string, string)) => switch (appMainState) {
+    | LoggingIn(workshopId, loginName) => Some((workshopId, loginName))
+    | _ => None
+};
+
 [@react.component]
 let make = () => {
   let (state, dispatchCommand) = React.useReducer(appTopLevelStateReducer, initial);
@@ -119,10 +124,17 @@ let make = () => {
 
   React.useEffect2(TimerUpdateEffect.timerUpdateEffect(isCoding, CodeCanvasState.dispatch), ((), isCoding));
 
+  let loggingIn = getLoggingIn(state.appMainState)
+
+  React.useEffect2(LoginEffect.loginEffect(loggingIn, text => dispatchCommand(LoginSuccess(text))), ((), loggingIn));
+
   let elements: list(reactComponent) =
     switch (state.appMainState) {
       | Login(_) => [<Login key="login" loginFunction={(loginName) => dispatchCommand(Login(loginName))}/>]
-      | LoggingIn(_, _) => [ReasonReact.string("loggingIn")]
+      | LoggingIn(_, loginName) => [
+        <div className="loggingIn">{ReasonReact.string("Kirjaudutaan sisään " ++ loginName ++". Odota hetki...")}
+        </div>
+        ]
       | Coding(appComponents) => [
         if (Set.has(appComponents, CanvasExperiment)) {
           <MainCanvas key="mainCanvas"/>;
