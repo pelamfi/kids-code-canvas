@@ -39,7 +39,7 @@ let initialComponents = Set.fromArray([|CanvasExperiment, CodeEditor, Help|], ~i
 
 // Clear hash and query, since we are not using them now
 let urlPath = (urlPath: list(string)): string => 
-  Js.Array.joinWith("/", Belt.List.toArray(urlPath));
+  "/" ++ Js.Array.joinWith("/", Belt.List.toArray(urlPath));
 
 let initial: appTopLevelState = {
   appMainState: Coding(initialComponents), 
@@ -133,7 +133,7 @@ let mainAppStateChangeListenerEffect =
 let urlUpdateEffect =
   (currentUrl: ReasonReactRouter.url, wantedPath: list(string)): (unit => option(unit => unit)) => {
   () => {
-    if (currentUrl.path != wantedPath) {
+    if (currentUrl.path != wantedPath && List.length(wantedPath) > 0) {
       let path = urlPath(wantedPath);
       Js.log("hisory push " ++ path)  
       ReasonReactRouter.push(path)
