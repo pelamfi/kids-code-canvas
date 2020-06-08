@@ -66,13 +66,13 @@ async function saveScriptlet(req, res) {
     }
 }
 
+console.log("Setting up express")
+
 express()
   .use(express.raw({type: "*/*"}))
   //.use(express.json()) // for parsing application/json
-  .use(express.static(path.join(__dirname, 'public')))
-  .get('/logintest/', (req, res) => res.render('public/index'))
-  .get('/', (req, res) => res.render('public/index'))
-  .get('/workshoptest/', (req, res) => res.render('public/index'))
+  .use('/', express.static(path.join(__dirname, 'public')))
+  .get('/(logintest|workshoptest)/', (req, res) => res.render('public/index'))
   .get('/workshop/:workshopId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/', (req, res) => res.render('public/index'))
   .get('/workshop/:workshopId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/:userName/', (req, res) => res.render('public/index'))
   .get('/api/0/:workshopId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/:userName/', getScriptlet)
