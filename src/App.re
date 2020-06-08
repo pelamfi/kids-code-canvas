@@ -132,7 +132,7 @@ let make = () => {
     switch (state.appMainState) {
       | Login(_) => [<Login key="login" loginFunction={(loginName) => dispatchCommand(Login(loginName))}/>]
       | LoggingIn(_, loginName) => [
-        <div className="loggingIn">{ReasonReact.string("Kirjaudutaan sisään " ++ loginName ++". Odota hetki...")}
+        <div key="loggingIn" className="loggingIn">{ReasonReact.string("Kirjaudutaan sisään " ++ loginName ++". Odota hetki...")}
         </div>
         ]
       | Coding(appComponents) => [
@@ -147,11 +147,11 @@ let make = () => {
           emptyFragment;
         },  
         if (Set.has(appComponents, Help)) {
-          <>
+          <React.Fragment key = "helpCells">
           <HelpCell key="help1"/>
           <HelpCell2 key="help2"/>
           <HelpCell3 key="help3"/>
-          </>
+          </React.Fragment>
         } else {
           emptyFragment;
         }
@@ -160,14 +160,14 @@ let make = () => {
 
   React.useEffect0(debugKeyboardListenerEffect(dispatchCommand));
 
-  <div className="topLevelGrid">
+  <div key="topLevelGrid" className="topLevelGrid">
   
-  <div className="titleCell"><h1>{React.string("Koodipaja")}</h1></div>
+  <div key="titleCell" className="titleCell"><h1>{React.string("Koodipaja")}</h1></div>
 
   {asReact(elements)}
 
-  <div className="canvasProbeCell">
-  <div id="canvasLayoutProbe" className="canvasProbeDiv"/>
+  <div key="canvasProbeCell" className="canvasProbeCell">
+  <div key="canvasLayoutProbe" id="canvasLayoutProbe" className="canvasLayoutProbe"/>
   </div>
 
   </div>

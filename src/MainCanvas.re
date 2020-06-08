@@ -119,15 +119,15 @@ let make = () => {
   React.useEffect0(codeCanvasStateChangeListenerEffect(dispatchCanvasEvent, CodeCanvasState.dispatch));
 
   let workshopInfo: list(React.element) = if (canvasState.compiledScriptlet.scriptlet.loginName != "") {
-    [<div className="workshopInfo">{React.string(canvasState.compiledScriptlet.scriptlet.loginName)}</div>];
+    [<div key="workshopInfo" className="workshopInfo">{React.string(canvasState.compiledScriptlet.scriptlet.loginName)}</div>];
   } else {
     [];
   };
 
   <>
   {ReactUtil.asReact(workshopInfo)}
-  <div className="canvasCell">
-  <div className="mainCanvasBorder">
+  <div key="mainCanvas" className="canvasCell">
+  <div key="mainCanvasBorder" className="mainCanvasBorder">
   <canvas
     ref={ReactDOMRe.Ref.callbackDomRef(elem =>
       React.Ref.setCurrent(canvasElementRef, Js.Nullable.toOption(elem))

@@ -99,11 +99,11 @@ body {
     @extend .grid-padding-x;
 }
 
-.canvasProbeCell {
+.canvasLayoutProbe {
     @extend %mainContentCell;
 }
 
-.canvasProbeDiv {
+.canvasLayoutProbe {
     @extend %componentBorder;
     border-color: transparent;
 }
