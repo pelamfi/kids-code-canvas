@@ -71,6 +71,8 @@ express()
   //.use(express.json()) // for parsing application/json
   .use(express.static(path.join(__dirname, 'public')))
   .get('/', (req, res) => res.render('public/index'))
+  .get('/logintest/', (req, res) => res.render('public/index'))
+  .get('/workshoptest/', (req, res) => res.render('public/index'))
   .get('/workshop/:workshopId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/', (req, res) => res.render('public/index'))
   .get('/workshop/:workshopId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/:userName/', (req, res) => res.render('public/index'))
   .get('/api/0/:workshopId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/:userName/', getScriptlet)
