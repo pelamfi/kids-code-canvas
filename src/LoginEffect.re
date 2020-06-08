@@ -10,8 +10,8 @@ let processResponse = (workshopId: string, loginName: string, scriptletString: s
   Js.Promise.resolve(scriptlet)
 }
 
-let loginEffect = (login: option((string, string)), dispatch: CodeCanvasState.scriptlet => unit): effect => {
-  let cancelableDispatch = ref(Some(dispatch));
+let loginEffect = (login: option((string, string))): effect => {
+  let cancelableDispatch = ref(Some(scriptlet => CodeCanvasState.dispatch(CodeCanvasState.Login(scriptlet))));
   () => 
   switch(login) {
     | Some((workshopId, loginName)) =>

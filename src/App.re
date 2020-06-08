@@ -30,7 +30,7 @@ type appMainState =
 
 type appTopLevelState = {
   appMainState,
-  urlPath: string,
+  urlPath: list(string),
   debugModes: DebugMode.debugModes,
   compiledScriptlet: CodeCanvasState.compiledScriptlet
 };
@@ -43,7 +43,7 @@ let urlPath = (urlPath: list(string)): string =>
 
 let initial: appTopLevelState = {
   appMainState: Coding(initialComponents), 
-  urlPath: urlPath([]), 
+  urlPath: [],
   debugModes: DebugMode.initial, 
   compiledScriptlet: CodeCanvasState.initialScriptlet
 };
@@ -67,12 +67,12 @@ let appTopLevelStateReducer = (prev: appTopLevelState, command: appTopLevelComma
           }
         | _ =>
           // no backend, non workshop mode
-          {...prev, compiledScriptlet: CodeCanvasState.initialScriptlet, urlPath: urlPath([]), appMainState: Coding(initialComponents)} 
+          {...prev, compiledScriptlet: CodeCanvasState.initialScriptlet, urlPath: [], appMainState: Coding(initialComponents)} 
       }
     | (Login(workshopId), Login(loginName)) =>  
-      {...prev, urlPath: urlPath(["workshop", workshopId, loginName]), appMainState: LoggingIn(workshopId, loginName)}
+      {...prev, appMainState: LoggingIn(workshopId, loginName)}
     | (LoggingIn(workshopId, loginName), LoginSuccess(compiledScriptlet)) =>
-      {...prev, compiledScriptlet, urlPath: urlPath(["workshop", workshopId, loginName]), appMainState: Coding(initialComponents)}
+      {...prev, compiledScriptlet, urlPath: ["workshop", workshopId, loginName], appMainState: Coding(initialComponents)}
     | (_, ToggleAppComponent(component)) => 
       switch (prev.appMainState) {
         | Coding(appComponents) => {...prev, appMainState: Coding(setToggle(appComponents, component))}
@@ -130,6 +130,18 @@ let mainAppStateChangeListenerEffect =
   );
 };
 
+let urlUpdateEffect =
+  (currentUrl: ReasonReactRouter.url, wantedPath: list(string)): (unit => option(unit => unit)) => {
+  () => {
+    if (currentUrl.path != wantedPath) {
+      let path = urlPath(wantedPath);
+      Js.log("hisory push " ++ path)  
+      ReasonReactRouter.push(path)
+    }
+    None
+  }
+};
+
 [@react.component]
 let make = () => {
   let (state, dispatchCommand) = React.useReducer(appTopLevelStateReducer, initial);
@@ -138,7 +150,7 @@ let make = () => {
 
   React.useEffect2(() => dispatchCommand(Url(url)) |> () => None, ((), url));
 
-  React.useEffect2(() => ReasonReactRouter.replace(state.urlPath) |> () => None, ((), state.urlPath));
+  React.useEffect2(urlUpdateEffect(url, state.urlPath), ((), state.urlPath));
 
   let isCoding = isCoding(state.appMainState);  
 
@@ -150,8 +162,7 @@ let make = () => {
 
   let loggingIn = getLoggingIn(state.appMainState)
 
-  React.useEffect2(LoginEffect.loginEffect(loggingIn, scriptlet =>
-    CodeCanvasState.dispatch(CodeCanvasState.Login(scriptlet))), ((), loggingIn));
+  React.useEffect2(LoginEffect.loginEffect(loggingIn), ((), loggingIn));
 
   let elements: list(reactComponent) =
     switch (state.appMainState) {
