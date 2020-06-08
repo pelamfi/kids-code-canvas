@@ -33,7 +33,7 @@ async function getScriptlet(req, res) {
             const scriptlet = 'x = t'    
             const { result } = await client.query(`insert into code_canvas_entry (workshop_id, nickname, scriptlet) 
             values ($1, $2, $3)`, [workshopId, userName, scriptlet]);
-            res.send({scriptlet})
+            res.send(scriptlet)
         } else {
             res.send(rows[0].scriptlet)
         }
@@ -71,7 +71,10 @@ console.log("Setting up express")
 express()
   .use(express.raw({type: "*/*"}))
   // |/workshoptest|/workshop/:workshopId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})
-  .use('/:a(workshop)?/:b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?/:c([^/]+)?/', express.static(path.join(__dirname, 'public')))
+  .use('/workshop/:b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/:c([^/]+)/', express.static(path.join(__dirname, 'public')))
+  .use('/workshop/:b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/', express.static(path.join(__dirname, 'public')))
+  .use('/workshoptest/', express.static(path.join(__dirname, 'public')))
+  .use('/', express.static(path.join(__dirname, 'public')))
   //.use('/logintest/', express.static(path.join(__dirname, 'public')))
   .get('/api/0/:workshopId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/:userName/', getScriptlet)
   .post('/api/0/:workshopId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/:userName/', saveScriptlet)
