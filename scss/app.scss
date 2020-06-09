@@ -14,6 +14,7 @@
 @include foundation-button;
 @include foundation-forms;
 @include foundation-menu;
+@include foundation-flex-classes;
 
 $brightBackground: rgba(210, 225, 220, 255);
 $darkerBackground: rgba(4, 161, 170, 255);
@@ -68,12 +69,6 @@ body {
     border-width: 1px;
 }
 
-.helpCell {
-    @extend .callout;
-    @extend %sideContentCell;
-    font-size: smaller;
-}
-
 .canvasCell {
     @extend %mainContentCell;
 }
@@ -101,6 +96,9 @@ body {
 
 .canvasProbeCell {
     @extend %mainContentCell;
+    @extend .small-order-3;
+    @extend .large-order-3;
+    @extend .medium-order-3;
 }
 
 .canvasLayoutProbe {
@@ -110,6 +108,9 @@ body {
 
 .codeEditorCell {
     @extend %mainContentCell;
+    @extend .small-order-2;
+    @extend .large-order-2;
+    @extend .medium-order-2;    
 }
 
 .codeEditor {
@@ -145,18 +146,41 @@ body {
     @extend .callout;
 }
 
+.helpCell1 {
+    @extend .callout;
+    @extend %sideContentCell;
+    @extend .large-order-1;
+    @extend .medium-order-1;
+    font-size: smaller;
+}
+
 .controlsWrapper {
     @extend .small-12;
     @extend .medium-4;
     @extend .large-4;
     @extend .cell;
-    @extend .grid-x;
+    @extend .grid-y;
     @extend .grid-margin-x;
+    @extend .large-order-2;
+    @extend .medium-order-2;
 }
 
 .controlButton {
-    @extend .button;
     @extend .cell;
-    @extend .small-4;
-    //margin-left: 1em;
+    @extend .button;
+    @extend .align-left;
+    //@extend .small-2;
+    //@extend .medium-2;
+    //@extend .large-2;
+    @extend .shrink;
 }
+
+.helpCell {
+    @extend .callout;
+    @extend %sideContentCell;
+    font-size: smaller;
+    @extend .large-order-3;
+    @extend .medium-order-3;
+}
+
+

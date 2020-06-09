@@ -186,11 +186,7 @@ let make = () => {
           emptyFragment;
         },  
         if (Set.has(appComponents, Help)) {
-          <React.Fragment key = "helpCells">
-          <HelpCell key="help1"/>
-          <HelpCell2 key="help2"/>
-          <HelpCell3 key="help3"/>
-          </React.Fragment>
+          <HelpCells key="helpCells"/>
         } else {
           emptyFragment;
         }
