@@ -178,7 +178,10 @@ let make = () => {
           emptyFragment;
         },    
         if (Set.has(appComponents, CodeEditor)) {
+          <React.Fragment key = "codeEditorCells">  
           <CodeEditor key="codeEditor" compiledScriptlet=state.compiledScriptlet/>
+          <Controls key="controls"/>
+          </React.Fragment>
         } else {
           emptyFragment;
         },  

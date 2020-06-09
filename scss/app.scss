@@ -144,3 +144,19 @@ body {
     @extend .cell;
     @extend .callout;
 }
+
+.controlsWrapper {
+    @extend .small-12;
+    @extend .medium-4;
+    @extend .large-4;
+    @extend .cell;
+    @extend .grid-x;
+    @extend .grid-margin-x;
+}
+
+.controlButton {
+    @extend .button;
+    @extend .cell;
+    @extend .small-4;
+    //margin-left: 1em;
+}

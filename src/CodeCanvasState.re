@@ -57,6 +57,7 @@ let initialState: state = {
 type event =
   | Login(scriptlet)
   | ChangeScriptlet(string)
+  | RestartAnimation
   | AnimationFrame(float)
   | RegisterListener(listener)
   | UnregisterListener(listener);
@@ -85,6 +86,13 @@ let updateState = (prevState: state, event: event): state => {
         frameTimes: None, 
         expectedFrameCount, 
         lastUpdate: [RenderFramesTo(expectedFrameCount), ScriptletFunctionChanged(compiledScriptlet)]}
+    }
+    | RestartAnimation => {
+      let expectedFrameCount = 0;
+      {...state, 
+        frameTimes: None, 
+        expectedFrameCount, 
+        lastUpdate: [RenderFramesTo(expectedFrameCount)]}
     }
     | AnimationFrame(frameMs) => {
       let firstMs: float = Belt.Option.map(state.frameTimes, t => t.firstMs) |> OptionUtil.getWithDefaultF(() => frameMs);  

@@ -63,7 +63,12 @@ let drawOnCanvas =
 let updateState = (state: canvasState, event: canvasEvent): canvasState => {
   switch(event) {
     | Redraw => {...state, frameCount: 0}
-    | ExpectedFrameCount(c) => {...state, expectedFrameCount: c}
+    | ExpectedFrameCount(c) => 
+      if (state.expectedFrameCount < c) {
+        {...state, expectedFrameCount: c}
+      } else {
+        {...state, expectedFrameCount: c, frameCount: 0}
+      }
     | FramesRendered(c) => {...state, frameCount: state.frameCount + c}
     | SetScriptletFunction(compiledScriptlet) => {compiledScriptlet, frameCount: 0, expectedFrameCount: 0}
   }
